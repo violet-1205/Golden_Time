@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>사고 이벤트 상세</title>
+    <style>
+        body { font-family: sans-serif; padding: 30px; }
+        table { border-collapse: collapse; width: 600px; }
+        th, td { border: 1px solid #ccc; padding: 10px 16px; text-align: left; }
+        th { background: #f5f5f5; width: 160px; }
+        .back { margin-bottom: 16px; display: block; }
+    </style>
+</head>
+<body>
+<a class="back" href="/accident">← 목록으로</a>
+<h2>사고 이벤트 상세 정보</h2>
+<table>
+    <tr><th>사건 번호</th>      <td th:text="${event.caseNumber}"></td></tr>
+    <tr><th>사고 일시</th>      <td th:text="${#temporals.format(event.occurredAt, 'yyyy-MM-dd HH:mm:ss')}"></td></tr>
+    <tr><th>충격 위치</th>      <td th:text="${event.impactDirection}"></td></tr>
+    <tr><th>충격 강도</th>      <td th:text="${event.impactMagnitude + 'g'}"></td></tr>
+    <tr><th>발생 장소</th>      <td th:text="${event.latitude + ', ' + event.longitude}"></td></tr>
+    <tr><th>가해 의심 차량</th>  <td th:text="${event.detectedPlate + ' (확률 ' + event.confidence + ')'}"></td></tr>
+    <tr><th>증거 영상</th>      <td><a th:href="${event.videoPath}" target="_blank">사고 전후 1분 영상 재생</a></td></tr>
+    <tr><th>분석 근거</th>      <td th:text="'우선순위 점수: ' + ${event.priorityScore}"></td></tr>
+    <tr><th>신고 상태</th>      <td th:text="${event.isApproved}"></td></tr>
+</table>
+</body>
+</html>

@@ -1,0 +1,2 @@
+CREATE SCHEMA IF NOT EXISTS goldentime;
+CREATE SCHEMA IF NOT EXISTS user_management;

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>메인</title>
+    <style>
+        body { font-family: sans-serif; padding: 30px; }
+        table { border-collapse: collapse; width: 700px; }
+        th, td { border: 1px solid #ccc; padding: 10px 14px; text-align: center; }
+        th { background: #f0f0f0; }
+        a { text-decoration: none; color: #1a73e8; }
+        a:hover { text-decoration: underline; }
+        .nav { margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+<div class="nav">
+    <a href="/">GT 이벤트 목록</a> &nbsp;|&nbsp;
+    <a href="/accident">사고 이벤트 목록 (물피도주)</a>
+</div>
+
+<h2>GT 이벤트 목록</h2>
+<table>
+    <thead>
+    <tr>
+        <th>GT ID</th>
+        <th>차량 ID</th>
+        <th>상태</th>
+        <th>발생 일시</th>
+        <th>상세보기</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="event : ${events}">
+        <td th:text="${event.gtId}"></td>
+        <td th:text="${event.vehicleId}"></td>
+        <td th:text="${event.status}"></td>
+        <td th:text="${#temporals.format(event.createdAt, 'yyyy-MM-dd HH:mm:ss')}"></td>
+        <td><a th:href="@{/gt-event/{id}(id=${event.gtId})}">상세보기</a></td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>

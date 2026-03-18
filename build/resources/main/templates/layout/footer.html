@@ -1,0 +1,5 @@
+<footer th:fragment="footer" class="border-t border-zinc-200 bg-white">
+    <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 text-sm text-zinc-500">
+        <div>© <span th:text="${#dates.format(#dates.createNow(),'yyyy')}"></span> GoldenTime</div>
+    </div>
+</footer>
