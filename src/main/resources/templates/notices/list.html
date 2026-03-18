@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>공지사항</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-zinc-50 text-zinc-900">
+<div th:replace="~{layout/top :: top}"></div>
+
+<div class="mx-auto flex min-h-[calc(100vh-56px)] max-w-7xl">
+    <div class="hidden md:block">
+        <div th:replace="~{layout/sidebar :: sidebar}"></div>
+    </div>
+
+    <div class="flex min-w-0 flex-1 flex-col">
+        <main class="flex-1 p-6">
+            <div class="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
+                <div class="flex justify-between items-center mb-6">
+                    <div class="space-y-2">
+                        <h1 class="text-2xl font-semibold tracking-tight">공지사항</h1>
+                        <p class="text-sm text-zinc-500">시스템 관련 주요 공지사항을 확인하세요.</p>
+                    </div>
+                    <a th:href="@{/notices/new}" class="inline-flex items-center justify-center rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2">글쓰기</a>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-zinc-200">
+                        <thead class="bg-zinc-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider w-16">번호</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider w-24">이미지</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">제목</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider w-32">작성일</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider w-24">조회수</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-zinc-200 bg-white">
+                            <tr th:each="notice : ${notices}" class="hover:bg-zinc-50 transition-colors">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-500" th:text="${notice.noticeId}"></td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div th:if="${notice.imagePath}" class="h-12 w-12 rounded-lg overflow-hidden border border-zinc-200 bg-zinc-100">
+                                        <img th:src="${notice.imagePath}" class="h-full w-full object-cover">
+                                    </div>
+                                    <div th:unless="${notice.imagePath}" class="h-12 w-12 rounded-lg border border-dashed border-zinc-200 bg-zinc-50 flex items-center justify-center">
+                                        <svg class="h-6 w-6 text-zinc-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-zinc-900">
+                                    <a href="#" th:href="@{/notices/{id}(id=${notice.noticeId})}" th:text="${notice.title}" class="hover:text-blue-600 transition-colors"></a>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-500" th:text="${#temporals.format(notice.createdAt, 'yyyy-MM-dd')}"></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-500" th:text="${notice.viewCount}"></td>
+                            </tr>
+                            <!-- 데이터가 없을 경우 -->
+                            <tr th:if="${#lists.isEmpty(notices)}">
+                                <td colspan="5" class="px-6 py-12 text-center text-sm text-zinc-500">등록된 공지사항이 없습니다.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+
+        <div th:replace="~{layout/footer :: footer}"></div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,51 @@
+<aside th:fragment="sidebar" class="w-64 shrink-0 border-r border-zinc-200 bg-white">
+    <div class="p-4">
+        <div class="rounded-lg border border-zinc-200 bg-zinc-50 p-3">
+            <div class="text-xs font-medium text-zinc-500">메뉴</div>
+        </div>
+    </div>
+
+    <nav class="px-2 pb-4 space-y-1">
+        <a th:href="@{/}" 
+           th:classappend="${currentUri == '/' ? 'bg-zinc-100 text-zinc-900' : 'text-zinc-700'}"
+           class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium hover:bg-zinc-100 transition-colors">
+            <span class="h-1.5 w-1.5 rounded-full" 
+                  th:classappend="${currentUri == '/' ? 'bg-zinc-900' : 'bg-zinc-300'}"></span>
+            메인화면
+        </a>
+        <a th:href="@{/dashboard}" 
+           th:classappend="${currentUri.startsWith('/dashboard') ? 'bg-zinc-100 text-zinc-900' : 'text-zinc-700'}"
+           class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium hover:bg-zinc-100 transition-colors">
+            <span class="h-1.5 w-1.5 rounded-full" 
+                  th:classappend="${currentUri.startsWith('/dashboard') ? 'bg-zinc-900' : 'bg-zinc-300'}"></span>
+            대시보드
+        </a>
+        <a th:href="@{/users}" 
+           th:classappend="${currentUri.startsWith('/users') ? 'bg-zinc-100 text-zinc-900' : 'text-zinc-700'}"
+           class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium hover:bg-zinc-100 transition-colors">
+            <span class="h-1.5 w-1.5 rounded-full" 
+                  th:classappend="${currentUri.startsWith('/users') ? 'bg-zinc-900' : 'bg-zinc-300'}"></span>
+            회원 관리
+        </a>
+
+        <a th:href="@{/mypage}" 
+           th:classappend="${currentUri.startsWith('/mypage') ? 'bg-zinc-100 text-zinc-900' : 'text-zinc-700'}"
+           class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium hover:bg-zinc-100 transition-colors">
+            <span class="h-1.5 w-1.5 rounded-full" 
+                  th:classappend="${currentUri.startsWith('/mypage') ? 'bg-zinc-900' : 'bg-zinc-300'}"></span>
+            마이페이지
+        </a>
+        <a th:href="@{/notices}" 
+           th:classappend="${currentUri.startsWith('/notices') ? 'bg-zinc-100 text-zinc-900' : 'text-zinc-700'}"
+           class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium hover:bg-zinc-100 transition-colors">
+            <span class="h-1.5 w-1.5 rounded-full" 
+                  th:classappend="${currentUri.startsWith('/notices') ? 'bg-zinc-900' : 'bg-zinc-300'}"></span>
+            공지사항
+        </a>
+        <a href="#" 
+           class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-100 transition-colors">
+            <span class="h-1.5 w-1.5 rounded-full bg-zinc-300"></span>
+            문의게시판
+        </a>
+    </nav>
+</aside>

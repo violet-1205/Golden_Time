@@ -1,0 +1,18 @@
+<header th:fragment="top" class="sticky top-0 z-40 border-b border-zinc-200 bg-white">
+    <div class="mx-auto flex h-14 max-w-7xl items-center justify-end px-6">
+
+        <div class="flex items-center gap-3">
+            <div class="hidden text-sm text-zinc-600 sm:block">
+                <span class="text-zinc-500">로그인:</span>
+                <span class="font-medium text-zinc-900" th:text="${loginId}"></span>
+            </div>
+            <form th:action="@{/logout}" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <button type="submit"
+                        class="inline-flex h-9 items-center justify-center rounded-md border border-zinc-200 bg-white px-3 text-sm font-medium shadow-sm transition-colors hover:bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-zinc-300 disabled:pointer-events-none disabled:opacity-50">
+                    로그아웃
+                </button>
+            </form>
+        </div>
+    </div>
+</header>
