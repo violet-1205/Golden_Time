@@ -4,6 +4,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -30,7 +31,7 @@ public class SignupController {
 
     @PostMapping
     public String signup(
-            @Valid SignupForm form,
+            @Valid @ModelAttribute("form") SignupForm form,
             BindingResult bindingResult,
             Model model
     ) {
