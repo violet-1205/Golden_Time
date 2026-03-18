@@ -18,7 +18,7 @@ bin/
 !**/src/test/**/bin/
 
 ### IntelliJ IDEA ###
-.idea
+# .idea
 *.iws
 *.iml
 *.ipr
@@ -34,4 +34,4 @@ out/
 /.nb-gradle/
 
 ### VS Code ###
-.vscode/
+# .vscode/
