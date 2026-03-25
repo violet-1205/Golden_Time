@@ -28,8 +28,11 @@ CREATE TABLE IF NOT EXISTS user_management.TB_NOTICE (
     content TEXT,
     view_count INT NOT NULL DEFAULT 0,
     image_path VARCHAR(500) UNIQUE,
+    important BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+ALTER TABLE user_management.TB_NOTICE ADD COLUMN IF NOT EXISTS important BOOLEAN NOT NULL DEFAULT FALSE;
 
 -- goldentime schema tables
 CREATE TABLE IF NOT EXISTS goldentime.TB_GT_EVENT (

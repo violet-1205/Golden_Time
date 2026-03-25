@@ -46,6 +46,7 @@ public class NoticeService {
                 .orElseThrow(() -> new IllegalArgumentException("Invalid notice Id:" + id));
         notice.setTitle(requestDto.getTitle());
         notice.setContent(requestDto.getContent());
+        notice.setImportant(Boolean.TRUE.equals(requestDto.getImportant()));
 
         if (requestDto.getImageFile() != null && !requestDto.getImageFile().isEmpty()) {
             String imagePath = saveFile(requestDto.getImageFile());
@@ -86,6 +87,7 @@ public class NoticeService {
     public Optional<NoticeResponseDto> findById(Long id) {
         return noticeRepository.findById(id).map(notice -> {
             notice.setViewCount((notice.getViewCount() == null ? 0 : notice.getViewCount()) + 1);
+            noticeRepository.save(notice);
             return new NoticeResponseDto(notice);
         });
     }

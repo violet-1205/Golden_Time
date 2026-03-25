@@ -9,6 +9,9 @@ goldentime/.idea/
 golden/golden/node_modules/
 golden/golden/dist/
 
+# Notice image uploads (runtime)
+goldentime/src/main/resources/static/images/
+
 # Python
 num/.venv/
 num/__pycache__/

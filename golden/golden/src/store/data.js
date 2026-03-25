@@ -171,28 +171,84 @@ export function useData() {
     return { success: false }
   }
 
-  function deleteNotice(id) {
-    const idx = state.notices.findIndex((n) => n.id === id)
-    if (idx !== -1) state.notices.splice(idx, 1)
+  function formatNoticeDate(iso) {
+    if (!iso) return ''
+    const d = new Date(iso)
+    if (Number.isNaN(d.getTime())) return String(iso)
+    return d.toLocaleDateString('ko-KR')
   }
 
-  function updateNotice(id, updates) {
-    const notice = state.notices.find((n) => n.id === id)
-    if (notice) Object.assign(notice, updates)
+  function mapNoticeFromApi(n) {
+    return {
+      id: String(n.id),
+      title: n.title,
+      content: n.content,
+      important: !!n.important,
+      author: n.author || '관리자',
+      image: n.image || '',
+      views: n.views ?? 0,
+      createdAt: formatNoticeDate(n.createdAt),
+    }
   }
 
-  function addNotice(notice) {
-    state.notices.unshift({
-      ...notice,
-      id: String(Date.now()),
-      views: 0,
-      createdAt: new Date().toLocaleDateString('ko-KR'),
+  async function fetchNotices() {
+    try {
+      const response = await fetch('/api/notices', { credentials: 'include' })
+      if (response.ok) {
+        const list = await response.json()
+        state.notices = list.map(mapNoticeFromApi)
+      }
+    } catch (error) {
+      console.error('Fetch notices error:', error)
+    }
+  }
+
+  async function addNotice(payload) {
+    const fd = new FormData()
+    fd.append('title', payload.title)
+    fd.append('content', payload.content)
+    fd.append('important', String(!!payload.important))
+    if (payload.imageFile) fd.append('imageFile', payload.imageFile)
+    const response = await fetch('/api/notices', {
+      method: 'POST',
+      body: fd,
+      credentials: 'include',
     })
+    if (response.ok) await fetchNotices()
   }
 
-  function incrementViews(id) {
-    const notice = state.notices.find((n) => n.id === id)
-    if (notice) notice.views++
+  async function updateNotice(id, payload) {
+    const fd = new FormData()
+    fd.append('title', payload.title)
+    fd.append('content', payload.content)
+    fd.append('important', String(!!payload.important))
+    if (payload.imageFile) fd.append('imageFile', payload.imageFile)
+    const response = await fetch(`/api/notices/${id}`, {
+      method: 'PUT',
+      body: fd,
+      credentials: 'include',
+    })
+    if (response.ok) await fetchNotices()
+  }
+
+  async function deleteNotice(id) {
+    const response = await fetch(`/api/notices/${id}`, {
+      method: 'DELETE',
+      credentials: 'include',
+    })
+    if (response.ok) await fetchNotices()
+  }
+
+  async function fetchNoticeDetail(id) {
+    const response = await fetch(`/api/notices/${id}`, { credentials: 'include' })
+    if (response.ok) {
+      const n = await response.json()
+      const mapped = mapNoticeFromApi(n)
+      const idx = state.notices.findIndex((x) => String(x.id) === String(id))
+      if (idx >= 0) state.notices[idx] = { ...state.notices[idx], ...mapped }
+      return mapped
+    }
+    return null
   }
 
   function addInquiry(inquiry) {
@@ -246,10 +302,11 @@ export function useData() {
     deleteEvent,
     sendEvent,
     updateEvent,
+    fetchNotices,
     addNotice,
     updateNotice,
     deleteNotice,
-    incrementViews,
+    fetchNoticeDetail,
     addInquiry,
     incrementInquiryViews,
     updateInquiry,

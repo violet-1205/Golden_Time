@@ -1,10 +1,10 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useAuth } from '../store/auth'
 import { useData } from '../store/data'
 
 const { isAdmin } = useAuth()
-const { notices, addNotice, updateNotice, deleteNotice, incrementViews } = useData()
+const { notices, addNotice, updateNotice, deleteNotice, fetchNotices, fetchNoticeDetail } = useData()
 
 const viewMode = ref('list')
 const selectedNotice = ref(null)
@@ -17,23 +17,43 @@ const sortedNotices = computed(() =>
   })
 )
 
-function openDetail(notice) {
-  incrementViews(notice.id)
-  selectedNotice.value = notice
+let previewObjectUrl = null
+
+function revokePreview() {
+  if (previewObjectUrl) {
+    URL.revokeObjectURL(previewObjectUrl)
+    previewObjectUrl = null
+  }
+}
+
+onMounted(() => {
+  fetchNotices()
+})
+
+async function openDetail(notice) {
+  const detail = await fetchNoticeDetail(notice.id)
+  selectedNotice.value = detail || notice
   isEditMode.value = false
   viewMode.value = 'detail'
 }
 
-// 작성/수정 폼
 const form = ref({ title: '', content: '', image: '', important: false })
 const formMsg = ref('')
 const imageFileName = ref('')
+const pendingImageFile = ref(null)
 
 function openForm(notice = null) {
   const validNotice = notice && typeof notice === 'object' && 'id' in notice
   isEditMode.value = !!validNotice
+  revokePreview()
+  pendingImageFile.value = null
   if (validNotice) {
-    form.value = { title: notice.title, content: notice.content, image: notice.image || '', important: notice.important || false }
+    form.value = {
+      title: notice.title,
+      content: notice.content,
+      image: notice.image || '',
+      important: notice.important || false,
+    }
     imageFileName.value = ''
   } else {
     form.value = { title: '', content: '', image: '', important: false }
@@ -46,41 +66,41 @@ function openForm(notice = null) {
 function handleImageChange(e) {
   const file = e.target.files?.[0]
   if (!file) return
+  revokePreview()
+  pendingImageFile.value = file
   imageFileName.value = file.name
-  const reader = new FileReader()
-  reader.onload = (ev) => {
-    form.value.image = ev.target?.result
-  }
-  reader.readAsDataURL(file)
+  previewObjectUrl = URL.createObjectURL(file)
+  form.value.image = previewObjectUrl
 }
 
-function handleSubmit() {
+async function handleSubmit() {
   if (!form.value.title.trim() || !form.value.content.trim()) {
     formMsg.value = '제목과 내용을 모두 입력하세요.'
     return
   }
   if (isEditMode.value && selectedNotice.value) {
-    updateNotice(selectedNotice.value.id, {
+    await updateNotice(selectedNotice.value.id, {
       title: form.value.title,
       content: form.value.content,
-      image: form.value.image,
       important: form.value.important,
+      imageFile: pendingImageFile.value,
     })
   } else {
-    addNotice({
+    await addNotice({
       title: form.value.title,
       content: form.value.content,
-      image: form.value.image,
       important: form.value.important,
-      author: '관리자',
+      imageFile: pendingImageFile.value,
     })
   }
+  revokePreview()
+  pendingImageFile.value = null
   viewMode.value = 'list'
 }
 
-function handleDelete(id) {
+async function handleDelete(id) {
   if (confirm('공지사항을 삭제하시겠습니까?')) {
-    deleteNotice(id)
+    await deleteNotice(id)
     viewMode.value = 'list'
   }
 }

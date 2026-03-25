@@ -38,6 +38,9 @@ public class Notice {
     @Column(name = "image_path", unique = true, length = 500)
     private String imagePath;
 
+    @Column(name = "important", nullable = false)
+    private boolean important = false;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

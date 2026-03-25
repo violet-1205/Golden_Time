@@ -13,6 +13,7 @@ public class NoticeSaveRequestDto {
     private Long noticeId;
     private String title;
     private String content;
+    private Boolean important;
     private MultipartFile imageFile;
 
     public Notice toEntity() {
@@ -20,6 +21,7 @@ public class NoticeSaveRequestDto {
         notice.setTitle(title);
         notice.setContent(content);
         notice.setViewCount(0);
+        notice.setImportant(Boolean.TRUE.equals(important));
         return notice;
     }
 

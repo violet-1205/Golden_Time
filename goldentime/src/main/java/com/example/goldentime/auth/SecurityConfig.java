@@ -6,6 +6,7 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.web.SecurityFilterChain;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -27,6 +28,10 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**", "/api/ocr/**").permitAll()
                         .requestMatchers("/api/users/me/**").authenticated()
                         .requestMatchers("/api/users/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/notices", "/api/notices/**").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/notices").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/notices/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/notices/**").hasRole("ADMIN")
                         .requestMatchers("/assets/**", "/logos/**", "/css/**", "/js/**", "/images/**", "/uploads/**", "/videos/**", "/*.svg", "/*.ico", "/*.mp4").permitAll()
                         .anyRequest().authenticated()
                 )
