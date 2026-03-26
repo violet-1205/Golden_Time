@@ -163,6 +163,26 @@ public class DashboardService {
     }
 
     @Transactional(readOnly = true)
+    public List<GtEventResponseDto> findTop5RecentEventsForUser(String loginId) {
+        if (loginId == null || loginId.isBlank()) {
+            return List.of();
+        }
+
+        User user = userRepository.findByLoginId(loginId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다: " + loginId));
+
+        // 사용자가 등록한 차량이 없으면 최근 신고도 보여줄 수 없음
+        List<UserVehicle> vehicles = userVehicleRepository.findAllByUserUserId(user.getUserId());
+        if (vehicles.isEmpty()) {
+            return List.of();
+        }
+
+        return gtEventRepository.findTop5ByVehicle_User_UserIdOrderByCreatedAtDesc(user.getUserId()).stream()
+                .map(GtEventResponseDto::new)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
     public Map<String, Long> getEventCountsByRegion() {
         List<String> paths = gtEventRepository.findAllVtIdPaths();
         return paths.stream()

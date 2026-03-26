@@ -36,8 +36,11 @@ public class DashboardApiController {
     }
 
     @GetMapping("/recent-events")
-    public ResponseEntity<List<GtEventResponseDto>> getRecentEvents() {
-        return ResponseEntity.ok(dashboardService.findTop5RecentEvents());
+    public ResponseEntity<List<GtEventResponseDto>> getRecentEvents(Principal principal) {
+        if (principal == null) {
+            return ResponseEntity.status(401).build();
+        }
+        return ResponseEntity.ok(dashboardService.findTop5RecentEventsForUser(principal.getName()));
     }
 
     @GetMapping("/events-by-region")
