@@ -714,8 +714,21 @@ function formatTimestamp(ts) {
     font-weight: 700;
     color: #64748b;
     font-size: 0.74rem;
-    margin-bottom: 4px;
+    margin-bottom: 2px;
     word-break: break-word;
+  }
+
+  /* 모바일에서 번호/기기값은 monospace + 줄바꿈 억제로 더 또렷하게 */
+  .data-table td[data-label="사건번호"],
+  .data-table td[data-label="기기번호"] {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
+      'Courier New', monospace;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-break: normal;
+    overflow-wrap: normal;
+    line-height: 1.2;
   }
 
   .td-actions {

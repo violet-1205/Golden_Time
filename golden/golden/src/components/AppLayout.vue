@@ -34,17 +34,18 @@ onBeforeUnmount(() => {
 })
 
 function toggleSidebar() {
-  if (isSidebarCollapsed.value) {
-    // 만약 이미 접혀있다면 -> 완전히 숨기기
+  // "중간 상태(접기)로 한번 걸쳐서"가 아니라,
+  // 열린 상태 <-> 닫힌 상태만 토글하도록 단순화.
+  // 모바일에서는 기본값이 hidden=true 이며, 여기서만 토글한다.
+  if (sidebarMq && sidebarMq.matches) {
     isSidebarCollapsed.value = false
-    isSidebarHidden.value = true
-  } else if (isSidebarHidden.value) {
-    // 만약 숨겨져있다면 -> 펼치기
-    isSidebarHidden.value = false
-  } else {
-    // 만약 펼쳐져있다면 -> 접기
-    isSidebarCollapsed.value = true
+    isSidebarHidden.value = !isSidebarHidden.value
+    return
   }
+
+  // 데스크탑에서도 접기/펴기 2단계를 없애고, 완전 닫힘/열림만 토글
+  isSidebarCollapsed.value = false
+  isSidebarHidden.value = !isSidebarHidden.value
 }
 
 const navItems = computed(() => {
@@ -118,7 +119,7 @@ function handleLogout() {
       <aside :class="['sidebar', { collapsed: isSidebarCollapsed, hidden: isSidebarHidden }]">
         <div class="sidebar-header" v-if="!isSidebarHidden">
           <p class="nav-header" v-if="!isSidebarCollapsed">메뉴</p>
-          <button class="btn-sidebar-toggle" @click="toggleSidebar" :title="isSidebarCollapsed ? '완전히 숨기기' : '메뉴 접기'">
+          <button class="btn-sidebar-toggle" @click="toggleSidebar" title="메뉴 닫기">
             <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
               <path d="M11 19l-7-7 7-7M19 19l-7-7 7-7" />
             </svg>
@@ -570,7 +571,8 @@ function handleLogout() {
     position: fixed;
     top: 62px;
     left: 0;
-    height: calc(100vh - 62px);
+    /* 모바일에서는 하단 푸터(고정) 높이만큼만 여유 공간을 남김 */
+    height: calc(100vh - 62px - 160px);
     z-index: 2000;
   }
 
@@ -596,7 +598,32 @@ function handleLogout() {
 
   .main-content {
     /* 고정 푸터가 본문을 덮지 않도록 하단 여백 확보 */
-    padding-bottom: 220px;
+    padding-bottom: 160px;
+  }
+
+  /* 모바일 푸터: 내용 줄이기 */
+  .footer-body {
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px !important;
+  }
+
+  .footer-partners {
+    display: none;
+  }
+
+  .footer-info p {
+    font-size: 0.72rem;
+    line-height: 1.45;
+  }
+
+  /* 주소 1줄 + 저작권만 남기기(2번째 p: 우편/전화 줄 숨김) */
+  .footer-info p:nth-child(2) {
+    display: none;
+  }
+
+  .copyright {
+    font-size: 0.66rem !important;
   }
 }
 </style>
