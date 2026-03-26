@@ -390,8 +390,8 @@ async function handleDelete(id) {
 
 .detail-page-header {
   padding: 24px 28px;
-  border-bottom: 1px solid #edf2f7;
-  background: #fafbfc;
+  border-bottom: 1px solid var(--border-solid);
+  background: var(--surface-2);
 }
 
 .detail-title-row {
@@ -409,7 +409,7 @@ async function handleDelete(id) {
   font-weight: 700;
   margin: 0;
   line-height: 1.35;
-  color: #1a202c;
+  color: var(--text-h);
 }
 
 .detail-meta {
@@ -417,7 +417,7 @@ async function handleDelete(id) {
   flex-wrap: wrap;
   gap: 8px 20px;
   font-size: 0.82rem;
-  color: #64748b;
+  color: var(--text-muted);
 }
 
 .detail-meta-item {

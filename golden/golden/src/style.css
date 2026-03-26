@@ -21,6 +21,8 @@
   --border-solid: #e5e7eb;
   --surface-2:   #f3f4f6;
   --page-bg:     #f8fafc;
+  --card-bg:     var(--bg-card);
+  --card-border: var(--border-solid);
 
   /* ── 버튼/상호작용 ── */
   --btn-outline-border: #d1d5db;
@@ -64,6 +66,8 @@ html[data-theme="dark"] {
   --surface-2: #111827;
   --border: rgba(255, 255, 255, 0.12);
   --border-solid: rgba(255, 255, 255, 0.12);
+  --card-bg: #0b1626;
+  --card-border: rgba(255, 255, 255, 0.12);
 
   /* ── 버튼/상호작용 ── */
   --btn-outline-border: rgba(255, 255, 255, 0.18);

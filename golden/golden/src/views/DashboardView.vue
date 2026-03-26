@@ -488,14 +488,14 @@ function formatTimestamp(ts) {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--border-solid);
   padding-bottom: 8px;
 }
 
 .detail-item .label {
   font-size: 0.75rem;
   font-weight: 700;
-  color: #64748b;
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -503,7 +503,7 @@ function formatTimestamp(ts) {
 .detail-item .value {
   font-size: 1rem;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text-h);
 }
 
 /* 전송 모달 스타일 */

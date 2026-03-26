@@ -542,9 +542,9 @@ function sizePresetsFor(id) {
 }
 
 .summary-card {
-  background: white;
+  background: var(--card-bg);
   padding: 20px;
-  border: 1px solid #eef2f7;
+  border: 1px solid var(--card-border);
   display: flex;
   align-items: center;
   gap: 16px;
@@ -557,11 +557,11 @@ function sizePresetsFor(id) {
   font-size: 28px;
   width: 52px;
   height: 52px;
-  background: #f8fafc;
+  background: var(--surface-2);
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid #f1f5f9;
+  border: 1px solid var(--border-solid);
 }
 
 .summary-info {
@@ -571,21 +571,21 @@ function sizePresetsFor(id) {
 
 .summary-label {
   font-size: 0.875rem;
-  color: #64748b;
+  color: var(--text-muted);
   font-weight: 500;
 }
 
 .summary-value {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--text-h);
 }
 
 /* 최신 신고 목록 */
 .recent-events-card {
-  background: white;
+  background: var(--card-bg);
   padding: 20px;
-  border: 1px solid #eef2f7;
+  border: 1px solid var(--card-border);
   margin-top: 0;
   height: 100%;
   box-sizing: border-box;

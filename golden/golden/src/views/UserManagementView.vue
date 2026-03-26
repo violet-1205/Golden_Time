@@ -251,8 +251,8 @@ function formatDate(dateStr) {
 /* 펼침 행 */
 .expand-row td {
   padding: 0;
-  border-bottom: 1px solid #e2e8f0;
-  background: #f8fafc;
+  border-bottom: 1px solid var(--border-solid);
+  background: var(--surface-2);
 }
 
 .vehicle-expand {
@@ -262,7 +262,7 @@ function formatDate(dateStr) {
 .vehicle-header {
   font-size: 0.88rem;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--text-h);
   margin-bottom: 12px;
 }
 
@@ -270,23 +270,23 @@ function formatDate(dateStr) {
   width: 100%;
   border-collapse: collapse;
   font-size: 0.86rem;
-  border: 1px solid #e2e8f0;
-  background: #fff;
+  border: 1px solid var(--border-solid);
+  background: var(--bg-card);
 }
 
 .vehicle-table th {
   text-align: left;
   padding: 10px 16px;
-  background: #f8fafc;
-  color: #4a5568;
+  background: var(--surface-2);
+  color: var(--text-muted);
   font-weight: 600;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--border-solid);
 }
 
 .vehicle-table td {
   padding: 12px 16px;
-  color: #1e293b;
-  border-right: 1px solid #edf2f7;
+  color: var(--text);
+  border-right: 1px solid var(--border-solid);
 }
 
 .vehicle-table td:last-child {
