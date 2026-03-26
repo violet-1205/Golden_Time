@@ -2,6 +2,7 @@
 import { ref, computed, onBeforeUnmount, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuth } from '../store/auth'
+import { getInitialTheme, setTheme, toggleTheme } from '../theme'
 
 const router = useRouter()
 const route = useRoute()
@@ -9,6 +10,7 @@ const { currentUser, isAdmin, logout } = useAuth()
 
 const isSidebarCollapsed = ref(false)
 const isSidebarHidden = ref(false)
+const theme = ref('light')
 
 let sidebarMq = null
 function syncSidebarForViewport() {
@@ -26,6 +28,9 @@ onMounted(() => {
   sidebarMq = window.matchMedia('(max-width: 768px)')
   syncSidebarForViewport()
   sidebarMq.addEventListener('change', syncSidebarForViewport)
+
+  theme.value = getInitialTheme()
+  setTheme(theme.value)
 })
 
 onBeforeUnmount(() => {
@@ -71,6 +76,10 @@ function handleLogout() {
   router.push('/login?logout=1')
 }
 
+function handleToggleTheme() {
+  theme.value = toggleTheme()
+}
+
 </script>
 
 <template>
@@ -104,6 +113,17 @@ function handleLogout() {
 
         <!-- 우측 여백 -->
         <div class="header-spacer"></div>
+
+        <!-- 다크모드 -->
+        <button
+          class="btn-theme"
+          type="button"
+          @click="handleToggleTheme"
+          :aria-label="theme === 'dark' ? '라이트 모드로 전환' : '다크 모드로 전환'"
+          :title="theme === 'dark' ? '라이트 모드' : '다크 모드'"
+        >
+          {{ theme === 'dark' ? '라이트' : '다크' }}
+        </button>
 
         <!-- 로그아웃 -->
         <button class="btn-logout" @click="handleLogout">로그아웃</button>
@@ -201,9 +221,9 @@ function handleLogout() {
   align-items: center;
   padding: 0 28px;
   height: 84px;
-  background: #ffffff;
-  border-bottom: 1px solid #e5e7eb;
-  box-shadow: 0 1px 0 #e5e7eb, 0 2px 10px rgba(0, 0, 0, 0.05);
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border-solid);
+  box-shadow: 0 1px 0 var(--border-solid), 0 2px 10px rgba(0, 0, 0, 0.05);
 }
 
 /* 로고 */
@@ -214,7 +234,7 @@ function handleLogout() {
   flex-shrink: 0;
   margin-right: 24px;
   padding-right: 24px;
-  border-right: 1px solid #e5e7eb;
+  border-right: 1px solid var(--border-solid);
   height: 40px;
 }
 
@@ -222,7 +242,7 @@ function handleLogout() {
 .btn-toggle-restore {
   background: none;
   border: none;
-  color: #6b7280;
+  color: var(--text-muted);
   cursor: pointer;
   padding: 8px;
   margin-right: 12px;
@@ -234,8 +254,8 @@ function handleLogout() {
 }
 
 .btn-toggle-restore:hover {
-  background: #f3f4f6;
-  color: #111827;
+  background: var(--surface-2);
+  color: var(--text-h);
 }
 
 .logo-img {
@@ -254,12 +274,12 @@ function handleLogout() {
 
 .greeting-text {
   font-size: 0.875rem;
-  color: #4b5563;
+  color: var(--text-muted);
   letter-spacing: 0;
 }
 
 .greeting-text strong {
-  color: #111827;
+  color: var(--text-h);
   font-weight: 700;
 }
 
@@ -292,8 +312,8 @@ function handleLogout() {
 .btn-logout {
   padding: 6px 16px;
   background: transparent;
-  color: #374151;
-  border: 1px solid #d1d5db;
+  color: var(--btn-outline-text);
+  border: 1px solid var(--btn-outline-border);
   border-radius: 0;
   font-size: 0.82rem;
   font-weight: 500;
@@ -305,9 +325,32 @@ function handleLogout() {
 }
 
 .btn-logout:hover {
-  background: #0d2137;
-  color: #fff;
-  border-color: #0d2137;
+  background: var(--btn-hover-bg);
+  color: var(--btn-hover-text);
+  border-color: var(--btn-hover-bg);
+}
+
+/* 다크모드 토글 버튼 (로그아웃 왼쪽) */
+.btn-theme {
+  padding: 6px 14px;
+  margin-right: 10px;
+  background: transparent;
+  color: var(--btn-outline-text);
+  border: 1px solid var(--btn-outline-border);
+  border-radius: 0;
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+  font-family: inherit;
+  flex-shrink: 0;
+}
+
+.btn-theme:hover {
+  background: var(--btn-hover-bg);
+  color: var(--btn-hover-text);
+  border-color: var(--btn-hover-bg);
 }
 
 

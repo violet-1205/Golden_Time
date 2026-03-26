@@ -19,6 +19,13 @@
   --bg-card:     #ffffff;
   --border:      rgba(0, 0, 0, 0.08);
   --border-solid: #e5e7eb;
+  --surface-2:   #f3f4f6;
+
+  /* ── 버튼/상호작용 ── */
+  --btn-outline-border: #d1d5db;
+  --btn-outline-text: #374151;
+  --btn-hover-bg: var(--navy);
+  --btn-hover-text: #ffffff;
 
   /* ── 그림자 ── */
   --shadow-xs:  0 1px 2px rgba(0, 0, 0, 0.05);
@@ -40,6 +47,27 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+html[data-theme="dark"] {
+  /* ── 텍스트 ── */
+  --text: #e5e7eb;
+  --text-h: #f9fafb;
+  --text-muted: #a3a3a3;
+  --text-light: #9ca3af;
+
+  /* ── 배경 / 레이아웃 ── */
+  --bg: #0b1220;
+  --bg-card: #0f1b2d;
+  --surface-2: #111827;
+  --border: rgba(255, 255, 255, 0.12);
+  --border-solid: rgba(255, 255, 255, 0.12);
+
+  /* ── 버튼/상호작용 ── */
+  --btn-outline-border: rgba(255, 255, 255, 0.18);
+  --btn-outline-text: #e5e7eb;
+  --btn-hover-bg: #e5e7eb;
+  --btn-hover-text: #0b1220;
 }
 
 body { margin: 0; }
