@@ -126,11 +126,11 @@ function formatTimestamp(ts) {
             <td colspan="5" class="empty-msg">조회된 이벤트 데이터가 없습니다.</td>
           </tr>
           <tr v-for="ev in events" :key="ev.gtId">
-            <td>{{ ev.gtId }}</td>
-            <td>{{ ev.serialNumber || '-' }}</td>
-            <td>{{ ev.carNumber }}</td>
-            <td>{{ ev.detectedPlate || '-' }}</td>
-            <td class="td-actions">
+            <td data-label="사건번호">{{ ev.gtId }}</td>
+            <td data-label="기기번호">{{ ev.serialNumber || '-' }}</td>
+            <td data-label="사용자 차량 번호">{{ ev.carNumber }}</td>
+            <td data-label="인식 번호판">{{ ev.detectedPlate || '-' }}</td>
+            <td class="td-actions" data-label="작업">
               <button class="btn-detail" @click="openEdit(ev)">상세보기</button>
               <button 
                 :class="['btn-send', { 'sent-completed': ev.sentToFire || ev.sentToSafety }]" 
@@ -683,6 +683,39 @@ function formatTimestamp(ts) {
     padding: 10px 10px;
     word-break: break-word;
     overflow-wrap: anywhere;
+  }
+
+  /* 모바일: 테이블을 카드형(행 단위 세로 표시)으로 전환 */
+  .data-table thead {
+    display: none;
+  }
+
+  .data-table,
+  .data-table tbody,
+  .data-table tr,
+  .data-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .data-table tr {
+    border-bottom: 1px solid #f1f5f9;
+    padding: 8px 0;
+  }
+
+  .data-table td {
+    border-bottom: none;
+    padding: 2px 0 !important;
+  }
+
+  .data-table td::before {
+    content: attr(data-label);
+    display: block;
+    font-weight: 700;
+    color: #64748b;
+    font-size: 0.74rem;
+    margin-bottom: 4px;
+    word-break: break-word;
   }
 
   .td-actions {

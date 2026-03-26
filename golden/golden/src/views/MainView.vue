@@ -378,10 +378,10 @@ function sizePresetsFor(id) {
                   </thead>
                   <tbody>
                     <tr v-for="event in recentEvents" :key="event.gtId">
-                      <td>{{ event.carNumber }}</td>
-                      <td>{{ event.detectedPlate || '-' }}</td>
-                      <td>{{ new Date(event.createdAt).toLocaleString() }}</td>
-                      <td>
+                      <td data-label="사용자 차량 번호">{{ event.carNumber }}</td>
+                      <td data-label="인식된 번호판">{{ event.detectedPlate || '-' }}</td>
+                      <td data-label="발생 시각">{{ new Date(event.createdAt).toLocaleString() }}</td>
+                      <td data-label="신고 상태">
                         <span v-if="event.sentToFire" class="status-tag fire">소방청</span>
                         <span v-else-if="event.sentToSafety" class="status-tag safety">안전신문고</span>
                         <span v-else class="status-tag pending">미전송</span>
@@ -1049,6 +1049,39 @@ function sizePresetsFor(id) {
 
   .events-table th {
     white-space: nowrap;
+  }
+
+  /* 모바일: 테이블을 카드형(행 단위 세로 표시)으로 전환 */
+  .events-table thead {
+    display: none;
+  }
+
+  .events-table,
+  .events-table tbody,
+  .events-table tr,
+  .events-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .events-table tr {
+    border-bottom: 1px solid #f1f5f9;
+    padding: 8px 0;
+  }
+
+  .events-table td {
+    border-bottom: none;
+    padding: 2px 0 !important;
+  }
+
+  .events-table td::before {
+    content: attr(data-label);
+    display: block;
+    font-weight: 700;
+    color: #64748b;
+    font-size: 0.74rem;
+    margin-bottom: 4px;
+    word-break: break-word;
   }
 
   .status-tag {
