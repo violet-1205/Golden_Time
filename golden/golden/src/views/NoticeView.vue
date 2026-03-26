@@ -359,11 +359,17 @@ async function handleDelete(id) {
 }
 
 :global(html[data-theme='dark']) .notice .important-row {
-  background: rgba(250, 204, 21, 0.10) !important;
+  background: rgba(250, 204, 21, 0.06) !important;
 }
 
 :global(html[data-theme='dark']) .notice .important-row:hover {
-  background: rgba(250, 204, 21, 0.14) !important;
+  background: rgba(250, 204, 21, 0.09) !important;
+}
+
+:global(html[data-theme='dark']) .notice .important-badge {
+  background: rgba(250, 204, 21, 0.18);
+  color: #fde68a;
+  border-color: rgba(250, 204, 21, 0.28);
 }
 
 .thumb {
