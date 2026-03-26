@@ -485,4 +485,86 @@ async function handleRegister() {
   margin-bottom: 24px;
   font-size: 0.9rem;
 }
+
+@media (max-width: 768px) {
+  .register-wrapper {
+    padding: 22px 14px;
+    align-items: flex-start;
+  }
+
+  .register-container {
+    padding: 22px 18px;
+    max-width: 520px;
+  }
+
+  .register-title {
+    font-size: 1.25rem;
+  }
+
+  .register-subtitle {
+    font-size: 0.8rem;
+    margin-bottom: 18px;
+  }
+
+  .section-label {
+    margin: 16px 0 10px;
+  }
+
+  /* 모바일: 2열 -> 1열 */
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .form-group.full {
+    margin-top: 8px;
+  }
+
+  .form-group label {
+    font-size: 0.8rem;
+  }
+
+  .form-group input {
+    font-size: 0.86rem;
+    padding: 10px 12px;
+  }
+
+  .serial-prefix {
+    font-size: 0.84rem;
+    min-height: 40px;
+  }
+
+  .toggle-password {
+    width: 34px;
+    height: 34px;
+  }
+
+  .btn-submit {
+    margin-top: 18px;
+    padding: 12px;
+    font-size: 0.92rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .register-wrapper {
+    padding: 18px 12px;
+  }
+
+  .register-container {
+    padding: 18px 14px;
+  }
+
+  .register-title {
+    font-size: 1.18rem;
+  }
+
+  .register-footer {
+    font-size: 0.82rem;
+  }
+
+  .btn-link {
+    font-size: 0.82rem;
+  }
+}
 </style>
