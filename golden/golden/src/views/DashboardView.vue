@@ -116,7 +116,7 @@ function formatTimestamp(ts) {
           <tr>
             <th>사건번호</th>
             <th>기기번호</th>
-            <th>내 차량번호</th>
+            <th>사용자 차량 번호</th>
             <th>인식 번호판</th>
             <th>작업</th>
           </tr>
@@ -174,7 +174,7 @@ function formatTimestamp(ts) {
                 <span class="value">{{ selectedEvent?.serialNumber || '-' }}</span>
               </div>
               <div class="detail-item">
-                <span class="label">내 차량번호</span>
+                <span class="label">사용자 차량 번호</span>
                 <span class="value">{{ selectedEvent?.carNumber }}</span>
               </div>
               <div class="detail-item">

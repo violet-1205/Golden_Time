@@ -370,7 +370,7 @@ function sizePresetsFor(id) {
                 <table class="events-table">
                   <thead>
                     <tr>
-                      <th>내 차량 번호</th>
+                      <th>사용자 차량 번호</th>
                       <th>인식된 번호판</th>
                       <th>발생 시각</th>
                       <th>신고 상태</th>
