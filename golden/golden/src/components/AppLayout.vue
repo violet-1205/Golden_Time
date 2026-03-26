@@ -497,13 +497,13 @@ function handleToggleTheme() {
   flex: 1;
   overflow-y: auto;
   position: relative;
-  background-color: #f8fafc;
+  background-color: var(--page-bg);
 }
 
 /* ===== 푸터 ===== */
 .app-footer {
-  background: #f8f9fa;
-  border-top: 1px solid #e0e0e0;
+  background: var(--bg-card);
+  border-top: 1px solid var(--border-solid);
   flex-shrink: 0;
   position: fixed;
   bottom: 0;
@@ -563,13 +563,13 @@ function handleToggleTheme() {
 
 .footer-info p {
   font-size: 0.77rem;
-  color: #666;
+  color: var(--text-muted);
   margin: 0;
   line-height: 1.55;
 }
 
 .copyright {
-  color: #aaa !important;
+  color: var(--text-light) !important;
   font-size: 0.73rem !important;
   margin-top: 2px;
 }

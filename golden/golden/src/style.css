@@ -20,6 +20,7 @@
   --border:      rgba(0, 0, 0, 0.08);
   --border-solid: #e5e7eb;
   --surface-2:   #f3f4f6;
+  --page-bg:     #f8fafc;
 
   /* ── 버튼/상호작용 ── */
   --btn-outline-border: #d1d5db;
@@ -59,6 +60,7 @@ html[data-theme="dark"] {
   /* ── 배경 / 레이아웃 ── */
   --bg: #0b1220;
   --bg-card: #0f1b2d;
+  --page-bg: #0b1220;
   --surface-2: #111827;
   --border: rgba(255, 255, 255, 0.12);
   --border-solid: rgba(255, 255, 255, 0.12);
@@ -70,7 +72,39 @@ html[data-theme="dark"] {
   --btn-hover-text: #0b1220;
 }
 
-body { margin: 0; }
+html, body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* 전역 기본 요소들도 테마 따라가게 */
+a { color: inherit; }
+hr { border-color: var(--border-solid); }
+
+input, select, textarea {
+  color: var(--text);
+  background: var(--bg-card);
+  border-color: var(--border-solid);
+}
+
+table {
+  color: var(--text);
+}
+
+/* 카드/패널류 기본 배경 통일 (각 뷰의 scoped CSS 하드코딩이 남아있어도, 최소한 전체 톤을 맞춤) */
+.card,
+.panel,
+.box,
+.container,
+.content,
+.content-card {
+  color: var(--text);
+}
 
 h1, h2, h3 {
   font-family: var(--sans);
