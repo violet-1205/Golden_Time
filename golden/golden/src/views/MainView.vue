@@ -1,7 +1,8 @@
 <script setup>
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useData } from '../store/data'
 import { useAuth } from '../store/auth'
+import { VueDraggableNext as Draggable } from 'vue-draggable-next'
 
 const { events, fetchEvents, stats, fetchStats, recentEvents, fetchRecentEvents, eventsByRegion, fetchEventsByRegion } = useData()
 const { users, fetchUsers, isAdmin } = useAuth()
@@ -17,20 +18,16 @@ onMounted(async () => {
 })
 
 const totalEvents = computed(() => events.value.length)
-const unsentCount = computed(() => 
-  events.value.filter(ev => !ev.sentToFire && !ev.sentToSafety).length
-)
+const unsentCount = computed(() => events.value.filter((ev) => !ev.sentToFire && !ev.sentToSafety).length)
 
 // 자원 활용도 계산 (기기번호 기준)
-// 전체 기기 수: 등록된 모든 차량의 기기번호 총합
 const totalDevices = computed(() => {
   if (!isAdmin.value) return 0
   return users.value.reduce((acc, user) => acc + (user.vehicles ? user.vehicles.length : 0), 0)
 })
 
-// 사용 중인 기기 수: 한 번이라도 신고 이벤트를 발생시킨 고유 기기번호 수
 const usedDevices = computed(() => {
-  const uniqueSerials = new Set(events.value.map(ev => ev.serialNumber).filter(s => s))
+  const uniqueSerials = new Set(events.value.map((ev) => ev.serialNumber).filter((s) => s))
   return uniqueSerials.size
 })
 
@@ -48,24 +45,155 @@ const averageAccuracy = computed(() => {
   return (val * 100).toFixed(1)
 })
 
-// 오늘의 통계 데이터
+// 오늘의 통계 데이터 (+ 미전송)
 const todayTotal = computed(() => stats.value?.totalEventsToday || 0)
 const todayFire = computed(() => stats.value?.sentToFireToday || 0)
 const todaySafety = computed(() => stats.value?.sentToSafetyToday || 0)
+const todayUnsent = computed(() => {
+  const total = Number(todayTotal.value) || 0
+  const fire = Number(todayFire.value) || 0
+  const safety = Number(todaySafety.value) || 0
+  const v = total - fire - safety
+  return v > 0 ? v : 0
+})
 
 const topRegions = computed(() => {
   const source = eventsByRegion.value || {}
   return Object.entries(source)
     .map(([name, count]) => ({ name, count: Number(count) || 0 }))
-    .filter(item => item.count > 0)
+    .filter((item) => item.count > 0)
     .sort((a, b) => b.count - a.count)
     .slice(0, 6)
 })
 
-const maxRegionCount = computed(() => {
-  return topRegions.value.length ? topRegions.value[0].count : 1
-})
+const maxRegionCount = computed(() => (topRegions.value.length ? topRegions.value[0].count : 1))
 
+// ========= 대시보드 배치 변경(드래그) =========
+const DASH_LAYOUT_KEY = 'goldentime.dashboard.main.layout.v2'
+
+const defaultLayout = [
+  { id: 'todayTotal', colSpan: 1, rowSpan: 1 },
+  { id: 'todayFire', colSpan: 1, rowSpan: 1 },
+  { id: 'todaySafety', colSpan: 1, rowSpan: 1 },
+  { id: 'todayUnsent', colSpan: 1, rowSpan: 1 },
+  { id: 'region', colSpan: 1, rowSpan: 2 },
+  { id: 'realtime', colSpan: 1, rowSpan: 2 },
+  { id: 'resource', colSpan: 1, rowSpan: 2 },
+  { id: 'accuracy', colSpan: 1, rowSpan: 2 },
+  { id: 'recent', colSpan: 4, rowSpan: 2 },
+]
+
+// (요청 기반) 허용 크기: 기본은 “고정”처럼 동작하지만, 원하면 나중에 옵션을 늘리기 쉬움
+const allowedSizesById = {
+  todayTotal: [{ colSpan: 1, rowSpan: 1 }],
+  todayFire: [{ colSpan: 1, rowSpan: 1 }],
+  todaySafety: [{ colSpan: 1, rowSpan: 1 }],
+  todayUnsent: [{ colSpan: 1, rowSpan: 1 }],
+
+  region: [{ colSpan: 1, rowSpan: 2 }],
+  realtime: [{ colSpan: 1, rowSpan: 2 }],
+  resource: [{ colSpan: 1, rowSpan: 2 }],
+  accuracy: [{ colSpan: 1, rowSpan: 2 }],
+
+  recent: [{ colSpan: 4, rowSpan: 2 }],
+}
+
+function normalizeLayout(raw) {
+  const byId = new Map(defaultLayout.map((x) => [x.id, x]))
+  const rawArr = Array.isArray(raw) ? raw : []
+  const normalizedRaw = rawArr
+    .map((x) => {
+      if (typeof x === 'string') return { id: x }
+      if (!x || typeof x !== 'object') return null
+      if (!('id' in x)) return null
+      return x
+    })
+    .filter(Boolean)
+
+  const ids = normalizedRaw.map((x) => x.id).filter((id) => byId.has(id))
+  const unique = [...new Set(ids)]
+  const missing = defaultLayout.map((x) => x.id).filter((id) => !unique.includes(id))
+
+  const overridesById = new Map(normalizedRaw.map((x) => [x.id, x]))
+  const merged = [...unique, ...missing].map((id) => {
+    const base = byId.get(id)
+    const o = overridesById.get(id) || {}
+    const candColSpan = Number.isInteger(o.colSpan) && o.colSpan >= 1 ? o.colSpan : base.colSpan
+    const candRowSpan = Number.isInteger(o.rowSpan) && o.rowSpan >= 1 ? o.rowSpan : base.rowSpan
+
+    const allowed = allowedSizesById[id]
+    if (!allowed) return { ...base, colSpan: candColSpan, rowSpan: candRowSpan }
+    const isAllowed = allowed.some((x) => x.colSpan === candColSpan && x.rowSpan === candRowSpan)
+    if (!isAllowed) return base
+    return { ...base, colSpan: candColSpan, rowSpan: candRowSpan }
+  })
+
+  // 최신 신고는 항상 마지막에 둬서(레이아웃 깨짐 방지) 기본 흐름 유지
+  const recentIdx = merged.findIndex((x) => x.id === 'recent')
+  if (recentIdx >= 0 && recentIdx !== merged.length - 1) {
+    const [r] = merged.splice(recentIdx, 1)
+    merged.push(r)
+  }
+
+  return merged
+}
+
+function loadLayout() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(DASH_LAYOUT_KEY) || 'null')
+    return normalizeLayout(raw)
+  } catch {
+    return normalizeLayout(null)
+  }
+}
+
+const dashboardLayout = ref(loadLayout())
+const layoutEditMode = ref(false)
+
+watch(
+  dashboardLayout,
+  (val) => {
+    try {
+      localStorage.setItem(
+        DASH_LAYOUT_KEY,
+        JSON.stringify(val.map((x) => ({ id: x.id, colSpan: x.colSpan, rowSpan: x.rowSpan }))),
+      )
+    } catch {
+      // ignore
+    }
+  },
+  { deep: true },
+)
+
+function resetLayout() {
+  dashboardLayout.value = normalizeLayout(null)
+  try {
+    localStorage.removeItem(DASH_LAYOUT_KEY)
+  } catch {
+    // ignore
+  }
+}
+
+function gridStyle(item) {
+  return {
+    gridColumn: `span ${item.colSpan}`,
+    gridRow: `span ${item.rowSpan}`,
+  }
+}
+
+function updateCardSize(id, colSpan, rowSpan) {
+  dashboardLayout.value = dashboardLayout.value.map((x) => {
+    if (x.id !== id) return x
+    return { ...x, colSpan, rowSpan }
+  })
+}
+
+function sizePresetsFor(id) {
+  const allowed = allowedSizesById[id] || []
+  return allowed.length
+    ? allowed.map((x) => ({ label: `${x.colSpan}x${x.rowSpan}`, colSpan: x.colSpan, rowSpan: x.rowSpan }))
+    : [{ label: '1x1', colSpan: 1, rowSpan: 1 }]
+}
 </script>
 
 <template>
@@ -76,135 +204,195 @@ const maxRegionCount = computed(() => {
           <h2 class="page-title">대시보드</h2>
           <p class="page-subtitle">시스템의 실시간 활성 사건 및 자원 활용도를 파악하세요.</p>
         </div>
+        <div class="header-actions">
+          <button class="btn-secondary" @click="layoutEditMode = !layoutEditMode">
+            {{ layoutEditMode ? '배치 변경 종료' : '배치 변경' }}
+          </button>
+          <button class="btn-secondary" :disabled="!layoutEditMode" @click="resetLayout">초기화</button>
+        </div>
       </div>
 
       <div class="content-body">
-        <!-- 대시보드 메인 그리드 -->
-        <div class="dashboard-main-grid">
-          <!-- 상단 요약 카드들 -->
-          <div class="summary-card total">
-            <div class="summary-icon">🚨</div>
-            <div class="summary-info">
-              <span class="summary-label">오늘의 탐지</span>
-              <span class="summary-value">{{ todayTotal }}건</span>
+        <Draggable
+          :list="dashboardLayout"
+          item-key="id"
+          :disabled="false"
+          handle=".drag-handle"
+          class="dashboard-main-grid"
+          ghost-class="drag-ghost"
+          chosen-class="drag-chosen"
+          drag-class="drag-dragging"
+        >
+          <div
+            v-for="element in dashboardLayout"
+            :key="element.id"
+            class="dash-item"
+            :class="{ 'is-editing': layoutEditMode }"
+            :style="gridStyle(element)"
+          >
+            <button v-if="layoutEditMode" class="drag-handle" type="button" title="드래그로 위치 변경">⋮⋮</button>
+            <div v-if="layoutEditMode" class="size-controls">
+              <button
+                v-for="opt in sizePresetsFor(element.id)"
+                :key="opt.label"
+                type="button"
+                class="size-btn"
+                :class="{ active: element.colSpan === opt.colSpan && element.rowSpan === opt.rowSpan }"
+                @click="updateCardSize(element.id, opt.colSpan, opt.rowSpan)"
+              >
+                {{ opt.label }}
+              </button>
             </div>
-          </div>
-          <div class="summary-card fire">
-            <div class="summary-icon">🚒</div>
-            <div class="summary-info">
-              <span class="summary-label">소방청 전송</span>
-              <span class="summary-value">{{ todayFire }}건</span>
-            </div>
-          </div>
-          <div class="summary-card safety">
-            <div class="summary-icon">🛡️</div>
-            <div class="summary-info">
-              <span class="summary-label">안전신문고 전송</span>
-              <span class="summary-value">{{ todaySafety }}건</span>
-            </div>
-          </div>
 
-          <!-- 지역별 사건 발생 현황 (리스트형으로 재구성) -->
-          <section class="stat-card region-card" aria-label="지역별 사건 발생 현황">
-            <div class="region-card-head">
-              <p class="card-label">지역별 사건 발생 현황</p>
-            </div>
-            <div class="region-card-body">
-              <div v-if="topRegions.length === 0" class="region-empty">
-                집계된 지역 데이터가 없습니다.
+            <template v-if="element.id === 'todayTotal'">
+              <div class="summary-card total">
+                <div class="summary-icon">🚨</div>
+                <div class="summary-info">
+                  <span class="summary-label">오늘의 탐지</span>
+                  <span class="summary-value">{{ todayTotal }}건</span>
+                </div>
               </div>
-              <ul v-else class="region-list">
-                <li v-for="(region, idx) in topRegions" :key="region.name" class="region-item">
-                  <div class="region-meta">
-                    <span class="region-rank">{{ idx + 1 }}</span>
-                    <span class="region-name">{{ region.name }}</span>
-                    <span class="region-count">{{ region.count }}건</span>
+            </template>
+
+            <template v-else-if="element.id === 'todayFire'">
+              <div class="summary-card fire">
+                <div class="summary-icon">🚒</div>
+                <div class="summary-info">
+                  <span class="summary-label">소방청 전송</span>
+                  <span class="summary-value">{{ todayFire }}건</span>
+                </div>
+              </div>
+            </template>
+
+            <template v-else-if="element.id === 'todaySafety'">
+              <div class="summary-card safety">
+                <div class="summary-icon">🛡️</div>
+                <div class="summary-info">
+                  <span class="summary-label">안전신문고 전송</span>
+                  <span class="summary-value">{{ todaySafety }}건</span>
+                </div>
+              </div>
+            </template>
+
+            <template v-else-if="element.id === 'todayUnsent'">
+              <div class="summary-card pending-today">
+                <div class="summary-icon">⏳</div>
+                <div class="summary-info">
+                  <span class="summary-label">오늘 미전송</span>
+                  <span class="summary-value">{{ todayUnsent }}건</span>
+                </div>
+              </div>
+            </template>
+
+            <template v-else-if="element.id === 'region'">
+              <section class="stat-card region-card" aria-label="지역별 사건 발생 현황">
+                <div class="region-card-head">
+                  <p class="card-label">지역별 사건 발생 현황</p>
+                </div>
+                <div class="region-card-body">
+                  <div v-if="topRegions.length === 0" class="region-empty">
+                    집계된 지역 데이터가 없습니다.
                   </div>
-                  <div class="region-bar-bg">
-                    <div
-                      class="region-bar-fill"
-                      :style="{ width: `${(region.count / maxRegionCount) * 100}%` }"
-                    ></div>
+                  <ul v-else class="region-list">
+                    <li v-for="(region, idx) in topRegions" :key="region.name" class="region-item">
+                      <div class="region-meta">
+                        <span class="region-rank">{{ idx + 1 }}</span>
+                        <span class="region-name">{{ region.name }}</span>
+                        <span class="region-count">{{ region.count }}건</span>
+                      </div>
+                      <div class="region-bar-bg">
+                        <div
+                          class="region-bar-fill"
+                          :style="{ width: `${(region.count / maxRegionCount) * 100}%` }"
+                        ></div>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+                <p class="card-desc">상위 지역 기준 실시간 발생 분포</p>
+              </section>
+            </template>
+
+            <template v-else-if="element.id === 'realtime'">
+              <div class="stat-card realtime-card">
+                <p class="card-label">실시간 활성 사건</p>
+                <div class="big-value">
+                  {{ totalEvents }}건
+                  <span class="change up">
+                    <span class="dot red"></span> 미전송 {{ unsentCount }}건
+                  </span>
+                </div>
+                <p class="card-desc">현재 접수된 전체 신고 사건 현황</p>
+              </div>
+            </template>
+
+            <template v-else-if="element.id === 'resource'">
+              <div class="stat-card resource-card">
+                <p class="card-label">자원 활용도 (기기 가동률)</p>
+                <div class="donut-wrap">
+                  <svg viewBox="0 0 100 100" class="donut-svg">
+                    <circle class="donut-track" cx="50" cy="50" r="38" />
+                    <circle
+                      class="donut-arc"
+                      cx="50" cy="50" r="38"
+                      transform="rotate(-90 50 50)"
+                      :stroke-dasharray="`${donutArc} 238.8`"
+                    />
+                  </svg>
+                  <div class="donut-center">
+                    <span class="donut-val">{{ resourcePercent }}%</span>
+                    <span class="donut-sub">{{ usedDevices }}/{{ totalDevices }} 유닛</span>
                   </div>
-                </li>
-              </ul>
-            </div>
-            <p class="card-desc">상위 지역 기준 실시간 발생 분포</p>
-          </section>
-
-          <!-- 하단 상세 지표 카드들 -->
-          <div class="stat-card realtime-card">
-            <p class="card-label">실시간 활성 사건</p>
-            <div class="big-value">
-              {{ totalEvents }}건
-              <span class="change up">
-                <span class="dot red"></span> 미전송 {{ unsentCount }}건
-              </span>
-            </div>
-            <p class="card-desc">현재 접수된 전체 신고 사건 현황</p>
-          </div>
-
-          <div class="stat-card resource-card">
-            <p class="card-label">자원 활용도 (기기 가동률)</p>
-            <div class="donut-wrap">
-              <svg viewBox="0 0 100 100" class="donut-svg">
-                <circle class="donut-track" cx="50" cy="50" r="38" />
-                <circle
-                  class="donut-arc"
-                  cx="50" cy="50" r="38"
-                  transform="rotate(-90 50 50)"
-                  :stroke-dasharray="`${donutArc} 238.8`"
-                />
-              </svg>
-              <div class="donut-center">
-                <span class="donut-val">{{ resourcePercent }}%</span>
-                <span class="donut-sub">{{ usedDevices }}/{{ totalDevices }} 유닛</span>
+                </div>
+                <p class="card-desc">전체 등록 기기 중 이벤트 발생 기기 비율</p>
               </div>
-            </div>
-            <p class="card-desc">전체 등록 기기 중 이벤트 발생 기기 비율</p>
-          </div>
+            </template>
 
-          <div class="stat-card accuracy-card">
-            <p class="card-label">번호판 인식 모델 정확도</p>
-            <div class="accuracy-content">
-              <div class="accuracy-value">
-                <span class="val-num">{{ averageAccuracy }}</span>
-                <span class="val-unit">%</span>
+            <template v-else-if="element.id === 'accuracy'">
+              <div class="stat-card accuracy-card">
+                <p class="card-label">번호판 인식 모델 정확도</p>
+                <div class="accuracy-content">
+                  <div class="accuracy-value">
+                    <span class="val-num">{{ averageAccuracy }}</span>
+                    <span class="val-unit">%</span>
+                  </div>
+                  <div class="accuracy-bar-bg">
+                    <div class="accuracy-bar-fill" :style="{ width: averageAccuracy + '%' }"></div>
+                  </div>
+                </div>
+                <p class="card-desc">OCR 분석 결과의 평균 신뢰도 지수</p>
               </div>
-              <div class="accuracy-bar-bg">
-                <div class="accuracy-bar-fill" :style="{ width: averageAccuracy + '%' }"></div>
-              </div>
-            </div>
-            <p class="card-desc">OCR 분석 결과의 평균 신뢰도 지수</p>
-          </div>
-        </div>
+            </template>
 
-        <!-- 최신 신고 목록 -->
-        <div class="recent-events-card">
-          <p class="card-label">최신 신고 목록 (5건)</p>
-          <table class="events-table">
-            <thead>
-              <tr>
-                <th>차량 번호</th>
-                <th>인식된 번호판</th>
-                <th>발생 시각</th>
-                <th>신고 상태</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="event in recentEvents" :key="event.gtId">
-                <td>{{ event.carNumber }}</td>
-                <td>{{ event.detectedPlate || '-' }}</td>
-                <td>{{ new Date(event.createdAt).toLocaleString() }}</td>
-                <td>
-                  <span v-if="event.sentToFire" class="status-tag fire">소방청</span>
-                  <span v-else-if="event.sentToSafety" class="status-tag safety">안전신문고</span>
-                  <span v-else class="status-tag pending">미전송</span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+            <template v-else-if="element.id === 'recent'">
+              <div class="recent-events-card">
+                <p class="card-label">최신 신고 목록 (5건)</p>
+                <table class="events-table">
+                  <thead>
+                    <tr>
+                      <th>내 차량 번호</th>
+                      <th>인식된 번호판</th>
+                      <th>발생 시각</th>
+                      <th>신고 상태</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="event in recentEvents" :key="event.gtId">
+                      <td>{{ event.carNumber }}</td>
+                      <td>{{ event.detectedPlate || '-' }}</td>
+                      <td>{{ new Date(event.createdAt).toLocaleString() }}</td>
+                      <td>
+                        <span v-if="event.sentToFire" class="status-tag fire">소방청</span>
+                        <span v-else-if="event.sentToSafety" class="status-tag safety">안전신문고</span>
+                        <span v-else class="status-tag pending">미전송</span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </template>
+          </div>
+        </Draggable>
       </div>
     </div>
   </div>
@@ -226,6 +414,36 @@ const maxRegionCount = computed(() => {
 .page-header {
   padding: 24px 28px;
   border-bottom: 1px solid #edf2f7;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.header-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.btn-secondary {
+  padding: 10px 14px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  font-family: inherit;
+  white-space: nowrap;
+}
+.btn-secondary:hover:not(:disabled) {
+  background: #f8fafc;
+}
+.btn-secondary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 .page-title {
@@ -247,10 +465,73 @@ const maxRegionCount = computed(() => {
 .dashboard-main-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: 90px minmax(0, 1fr);
+  grid-auto-rows: 110px;
+  grid-auto-flow: row dense;
   gap: 20px;
   margin-bottom: 24px;
-  height: 420px;
+}
+
+.dash-item {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+}
+
+.dash-item.is-editing {
+  outline: 2px dashed rgba(59, 130, 246, 0.65);
+  outline-offset: 3px;
+}
+
+.drag-handle {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 5;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  background: rgba(255, 255, 255, 0.95);
+  color: #64748b;
+  font-weight: 900;
+  cursor: grab;
+  line-height: 1;
+}
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+.size-controls {
+  position: absolute;
+  top: 8px;
+  right: 46px;
+  z-index: 6;
+  display: flex;
+  gap: 6px;
+  padding: 6px 6px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.size-btn {
+  padding: 4px 6px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  color: #475569;
+  cursor: pointer;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+.size-btn:hover {
+  background: #f8fafc;
+}
+.size-btn.active {
+  background: #1a73e8;
+  border-color: #1a73e8;
+  color: #fff;
 }
 
 .grid-col {
@@ -305,7 +586,9 @@ const maxRegionCount = computed(() => {
   background: white;
   padding: 20px;
   border: 1px solid #eef2f7;
-  margin-top: 24px;
+  margin-top: 0;
+  height: 100%;
+  box-sizing: border-box;
 }
 
 .events-table {
@@ -348,11 +631,10 @@ const maxRegionCount = computed(() => {
   min-height: 0; /* flex 자식의 overflow 방지 */
   box-sizing: border-box;
   overflow: hidden;
+  height: 100%;
 }
 
 .region-card {
-  grid-column: 4;
-  grid-row: 1 / 3;
   min-height: 0;
   overflow: hidden;
   display: flex;

@@ -8,6 +8,7 @@ import com.example.goldentime.dashboard.service.DashboardService;
 import com.example.goldentime.user.repository.UserVehicleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -36,11 +37,17 @@ public class DashboardApiController {
     }
 
     @GetMapping("/recent-events")
-    public ResponseEntity<List<GtEventResponseDto>> getRecentEvents(Principal principal) {
-        if (principal == null) {
+    public ResponseEntity<List<GtEventResponseDto>> getRecentEvents(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.status(401).build();
         }
-        return ResponseEntity.ok(dashboardService.findTop5RecentEventsForUser(principal.getName()));
+        // 관리자 대시보드(/main)는 전체 신고 현황이 필요하고, 관리자 계정은 등록 차량이 없을 수 있음
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
+        if (isAdmin) {
+            return ResponseEntity.ok(dashboardService.findTop5RecentEvents());
+        }
+        return ResponseEntity.ok(dashboardService.findTop5RecentEventsForUser(authentication.getName()));
     }
 
     @GetMapping("/events-by-region")

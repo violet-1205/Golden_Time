@@ -72,7 +72,7 @@ const state = reactive({
 export function useData() {
   async function fetchEvents() {
     try {
-      const response = await fetch('/api/dashboard/events')
+      const response = await fetch('/api/dashboard/events', { credentials: 'include' })
       if (response.ok) {
         state.events = await response.json()
       }
@@ -83,7 +83,7 @@ export function useData() {
 
   async function fetchStats() {
     try {
-      const response = await fetch('/api/dashboard/stats')
+      const response = await fetch('/api/dashboard/stats', { credentials: 'include' })
       if (response.ok) {
         state.stats = await response.json()
       }
@@ -94,7 +94,7 @@ export function useData() {
 
   async function fetchRecentEvents() {
     try {
-      const response = await fetch('/api/dashboard/recent-events')
+      const response = await fetch('/api/dashboard/recent-events', { credentials: 'include' })
       if (response.ok) {
         state.recentEvents = await response.json()
       }
@@ -105,7 +105,7 @@ export function useData() {
 
   async function fetchEventsByRegion() {
     try {
-      const response = await fetch('/api/dashboard/events-by-region')
+      const response = await fetch('/api/dashboard/events-by-region', { credentials: 'include' })
       if (response.ok) {
         state.eventsByRegion = await response.json()
       }
