@@ -642,4 +642,22 @@ async function handleDelete(id) {
   padding-top: 8px;
   border-top: 1px solid #e8eef6;
 }
+
+/* ===== 다크모드 전용 보정 (공지 상단/헤더/목록) ===== */
+:global(html[data-theme='dark']) .notice .page-header,
+:global(html[data-theme='dark']) .notice .detail-page-header,
+:global(html[data-theme='dark']) .notice .form-page-header {
+  background: #111827;
+  border-bottom-color: rgba(255, 255, 255, 0.14);
+}
+
+:global(html[data-theme='dark']) .notice .page-title,
+:global(html[data-theme='dark']) .notice .detail-title {
+  color: #f8fafc;
+}
+
+:global(html[data-theme='dark']) .notice .page-subtitle,
+:global(html[data-theme='dark']) .notice .detail-meta {
+  color: #cbd5e1;
+}
 </style>

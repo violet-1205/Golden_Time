@@ -1004,6 +1004,75 @@ function sizePresetsFor(id) {
   fill: #64748b;
 }
 
+/* ===== 다크모드 전용 보정 (대시보드 전역) ===== */
+:global(html[data-theme='dark']) .summary-card,
+:global(html[data-theme='dark']) .recent-events-card,
+:global(html[data-theme='dark']) .stat-card {
+  background: #0f1b2d;
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+:global(html[data-theme='dark']) .summary-icon {
+  background: #0b1626;
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+:global(html[data-theme='dark']) .summary-label,
+:global(html[data-theme='dark']) .card-label,
+:global(html[data-theme='dark']) .card-desc,
+:global(html[data-theme='dark']) .region-name,
+:global(html[data-theme='dark']) .region-count,
+:global(html[data-theme='dark']) .region-rank,
+:global(html[data-theme='dark']) .donut-sub,
+:global(html[data-theme='dark']) .bar-label,
+:global(html[data-theme='dark']) .rank {
+  color: #cbd5e1;
+}
+
+:global(html[data-theme='dark']) .summary-value,
+:global(html[data-theme='dark']) .big-value,
+:global(html[data-theme='dark']) .donut-val,
+:global(html[data-theme='dark']) .accuracy-value .val-num,
+:global(html[data-theme='dark']) .area,
+:global(html[data-theme='dark']) .bar-val {
+  color: #f8fafc;
+}
+
+:global(html[data-theme='dark']) .events-table th {
+  background: #111827;
+  color: #cbd5e1;
+  border-bottom-color: rgba(255, 255, 255, 0.14);
+}
+
+:global(html[data-theme='dark']) .events-table td {
+  color: #e5e7eb;
+  border-bottom-color: rgba(255, 255, 255, 0.12);
+}
+
+:global(html[data-theme='dark']) .status-tag.pending {
+  background: #1f2937;
+  color: #d1d5db;
+}
+
+:global(html[data-theme='dark']) .status-tag.fire {
+  background: rgba(239, 68, 68, 0.18);
+  color: #fca5a5;
+}
+
+:global(html[data-theme='dark']) .status-tag.safety {
+  background: rgba(16, 185, 129, 0.18);
+  color: #6ee7b7;
+}
+
+:global(html[data-theme='dark']) .donut-track {
+  stroke: #1f2937;
+}
+
+:global(html[data-theme='dark']) .region-bar-bg,
+:global(html[data-theme='dark']) .accuracy-bar-bg {
+  background: #1f2937;
+}
+
 @media (max-width: 768px) {
   .main-view {
     padding: 14px;
