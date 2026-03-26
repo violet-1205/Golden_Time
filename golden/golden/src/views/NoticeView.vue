@@ -273,7 +273,7 @@ async function handleDelete(id) {
 /* 헤더 */
 .page-header {
   padding: 24px 28px;
-  border-bottom: 1px solid #edf2f7;
+  border-bottom: 1px solid var(--border-solid);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -332,12 +332,12 @@ async function handleDelete(id) {
   background: #f8fafc;
   color: #4a5568;
   font-weight: 600;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--border-solid);
 }
 
 .data-table td {
   padding: 14px 20px;
-  border-bottom: 1px solid #edf2f7;
+  border-bottom: 1px solid var(--border-solid);
   color: #2d3748;
 }
 
@@ -352,6 +352,19 @@ async function handleDelete(id) {
 .clickable-row:hover { background: #f9f9f9; }
 .important-row { background: #fffbeb; }
 .important-row:hover { background: #fef9e7; }
+
+/* ===== 다크모드 hover 톤 완화 (공지사항) ===== */
+:global(html[data-theme='dark']) .notice .clickable-row:hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+}
+
+:global(html[data-theme='dark']) .notice .important-row {
+  background: rgba(250, 204, 21, 0.10) !important;
+}
+
+:global(html[data-theme='dark']) .notice .important-row:hover {
+  background: rgba(250, 204, 21, 0.14) !important;
+}
 
 .thumb {
   width: 36px;

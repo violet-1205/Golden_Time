@@ -413,7 +413,7 @@ function sizePresetsFor(id) {
 
 .page-header {
   padding: 24px 28px;
-  border-bottom: 1px solid #edf2f7;
+  border-bottom: 1px solid var(--border-solid);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -600,7 +600,7 @@ function sizePresetsFor(id) {
 .events-table th, .events-table td {
   padding: 12px;
   text-align: left;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--border-solid);
   font-size: 0.9rem;
 }
 
@@ -1046,7 +1046,19 @@ function sizePresetsFor(id) {
 
 :global(html[data-theme='dark']) .events-table td {
   color: #e5e7eb;
-  border-bottom-color: rgba(255, 255, 255, 0.12);
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+:global(html[data-theme='dark']) .page-header {
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+:global(html[data-theme='dark']) .events-table tr {
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+:global(html[data-theme='dark']) .events-table td::before {
+  color: #cbd5e1;
 }
 
 :global(html[data-theme='dark']) .status-tag.pending {
@@ -1071,6 +1083,25 @@ function sizePresetsFor(id) {
 :global(html[data-theme='dark']) .region-bar-bg,
 :global(html[data-theme='dark']) .accuracy-bar-bg {
   background: #1f2937;
+}
+
+:global(html[data-theme='dark']) .region-item {
+  background: #0b1626 !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+:global(html[data-theme='dark']) .region-empty {
+  color: #94a3b8 !important;
+}
+
+:global(html[data-theme='dark']) .region-rank,
+:global(html[data-theme='dark']) .region-name,
+:global(html[data-theme='dark']) .region-count {
+  color: #e2e8f0 !important;
+}
+
+:global(html[data-theme='dark']) .region-bar-bg {
+  background: #111827 !important;
 }
 
 @media (max-width: 768px) {

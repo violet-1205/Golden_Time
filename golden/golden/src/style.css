@@ -64,10 +64,10 @@ html[data-theme="dark"] {
   --bg-card: #0f1b2d;
   --page-bg: #0b1220;
   --surface-2: #111827;
-  --border: rgba(255, 255, 255, 0.12);
-  --border-solid: rgba(255, 255, 255, 0.12);
+  --border: rgba(255, 255, 255, 0.08);
+  --border-solid: rgba(255, 255, 255, 0.08);
   --card-bg: #0b1626;
-  --card-border: rgba(255, 255, 255, 0.12);
+  --card-border: rgba(255, 255, 255, 0.1);
 
   /* ── 버튼/상호작용 ── */
   --btn-outline-border: rgba(255, 255, 255, 0.18);
@@ -133,6 +133,68 @@ table.data-table,
 html[data-theme="dark"] .btn-dark {
   background: #2563eb !important;
   color: #fff !important;
+}
+
+/* ===== Dashboard dark mode hard override ===== */
+html[data-theme="dark"] .main-view .summary-card,
+html[data-theme="dark"] .main-view .recent-events-card,
+html[data-theme="dark"] .main-view .stat-card,
+html[data-theme="dark"] .main-view .region-card {
+  background: #0f1b2d !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
+}
+
+html[data-theme="dark"] .main-view .summary-icon {
+  background: #0b1626 !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+html[data-theme="dark"] .main-view .summary-label,
+html[data-theme="dark"] .main-view .card-label,
+html[data-theme="dark"] .main-view .card-desc,
+html[data-theme="dark"] .main-view .region-name,
+html[data-theme="dark"] .main-view .region-count,
+html[data-theme="dark"] .main-view .region-rank,
+html[data-theme="dark"] .main-view .donut-sub,
+html[data-theme="dark"] .main-view .bar-label,
+html[data-theme="dark"] .main-view .rank,
+html[data-theme="dark"] .main-view .events-table td::before {
+  color: #cbd5e1 !important;
+}
+
+html[data-theme="dark"] .main-view .summary-value,
+html[data-theme="dark"] .main-view .big-value,
+html[data-theme="dark"] .main-view .donut-val,
+html[data-theme="dark"] .main-view .accuracy-value .val-num,
+html[data-theme="dark"] .main-view .area,
+html[data-theme="dark"] .main-view .bar-val,
+html[data-theme="dark"] .main-view .events-table td {
+  color: #f8fafc !important;
+}
+
+html[data-theme="dark"] .main-view .events-table th {
+  background: #111827 !important;
+  color: #cbd5e1 !important;
+  border-bottom-color: rgba(255, 255, 255, 0.14) !important;
+}
+
+html[data-theme="dark"] .main-view .events-table tr {
+  border-bottom-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+html[data-theme="dark"] .main-view .status-tag.pending {
+  background: #1f2937 !important;
+  color: #d1d5db !important;
+}
+
+html[data-theme="dark"] .main-view .status-tag.fire {
+  background: rgba(239, 68, 68, 0.18) !important;
+  color: #fca5a5 !important;
+}
+
+html[data-theme="dark"] .main-view .status-tag.safety {
+  background: rgba(16, 185, 129, 0.18) !important;
+  color: #6ee7b7 !important;
 }
 
 html, body {
