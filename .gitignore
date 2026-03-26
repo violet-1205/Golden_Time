@@ -13,11 +13,15 @@ golden/golden/dist/
 goldentime/src/main/resources/static/images/
 
 # Python
-num/.venv/
+.venv/
 num/__pycache__/
 num/.cache/
 num/.paddleocr/
 *.pyc
+
+# OCR runtime caches
+num/.matplotlib/
+num/.paddlex/
 
 # Logs
 num/server.log

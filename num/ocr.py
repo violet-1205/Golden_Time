@@ -2,6 +2,7 @@ import sys
 import json
 import cv2
 import re
+import inspect
 from collections import Counter
 from paddleocr import PaddleOCR
 
@@ -23,13 +24,44 @@ def get_ocr_engine():
     if _ocr_engine is None:
         print("[OCR] Initializing PaddleOCR engine... (This may take a while on first run)")
         try:
-            # show_log=True로 설정하여 내부 로딩 과정을 볼 수 있게 함
-            _ocr_engine = PaddleOCR(lang='korean', use_angle_cls=True, show_log=True)
+            # PaddleOCR 버전마다 지원 인자가 달라 안전하게 구성
+            kwargs = dict(lang='korean', use_angle_cls=True)
+            sig = None
+            try:
+                sig = inspect.signature(PaddleOCR.__init__)
+            except Exception:
+                sig = None
+
+            if sig is not None:
+                params = sig.parameters
+                if 'show_log' in params:
+                    kwargs['show_log'] = True
+                if 'use_gpu' in params:
+                    kwargs['use_gpu'] = False
+                if 'use_mkldnn' in params:
+                    kwargs['use_mkldnn'] = False
+
+            _ocr_engine = PaddleOCR(**kwargs)
             print("[OCR] PaddleOCR engine initialized successfully.")
         except Exception as e:
             print(f"[OCR] Failed to initialize engine: {str(e)}")
             raise e
     return _ocr_engine
+
+def _iter_ocr_lines(result):
+    """
+    PaddleOCR.ocr 반환 구조가 버전/옵션에 따라 달라서 방어적으로 순회한다.
+    기대하는 line 형식: [box, (text, conf)] 또는 (box, (text, conf))
+    """
+    if not result:
+        return []
+    # 케이스1: [ [line, line, ...] ]
+    if isinstance(result, list) and len(result) == 1 and isinstance(result[0], list):
+        return result[0]
+    # 케이스2: [line, line, ...]
+    if isinstance(result, list):
+        return result
+    return []
 
 def recognize_plate_from_video(video_path):
     try:
@@ -61,15 +93,21 @@ def recognize_plate_from_video(video_path):
                 print(f"[OCR] Analyzing frame {frame_count}/{total_frames}...", end='\r')
                 
                 result = ocr.ocr(frame)
-                if result and result[0]:
-                    for line in result[0]:
-                        text = line[1][0]
-                        conf = line[1][1]
-                        cleaned = clean_plate_number(text)
-                        if cleaned:
-                            print(f"\n[OCR] Detected candidate: {cleaned} ({conf:.2f})")
-                            detected_plates.append(cleaned)
-                            confidences.append(conf)
+                for line in _iter_ocr_lines(result):
+                    try:
+                        payload = line[1] if isinstance(line, (list, tuple)) and len(line) >= 2 else None
+                        if not payload or not isinstance(payload, (list, tuple)) or len(payload) < 2:
+                            continue
+                        text = payload[0]
+                        conf = float(payload[1])
+                    except Exception:
+                        continue
+
+                    cleaned = clean_plate_number(str(text))
+                    if cleaned:
+                        print(f"\n[OCR] Detected candidate: {cleaned} ({conf:.2f})")
+                        detected_plates.append(cleaned)
+                        confidences.append(conf)
                 
                 # 충분한 샘플(예: 10개 이상)이 모이면 조기 종료하여 시간 단축
                 if len(detected_plates) >= 10:
@@ -94,7 +132,7 @@ def recognize_plate_from_video(video_path):
         return {
             "detected_plate": most_common_plate, 
             "confidence": avg_confidence,
-            "total_frames_processed": frame_count // 5,
+            "total_frames_processed": processed_count,
             "detection_count": plate_counts[most_common_plate]
         }
             

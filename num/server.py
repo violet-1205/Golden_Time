@@ -1,15 +1,22 @@
 import os
 import tempfile
 import time
+import sys
 
 # oneDNN 충돌 해결 및 권한 문제 우회를 위한 환경 변수 설정
 os.environ['KMP_DUPLICATE_LIB_OK']='True'
 os.environ['FLAGS_use_mkldnn_kernel']='0'
+os.environ['FLAGS_use_mkldnn']='0'
+os.environ['FLAGS_enable_mkldnn']='0'
 
 # 모델 다운로드 경로를 프로젝트 내부로 변경 (권한 문제 해결)
 project_num_path = os.path.dirname(os.path.abspath(__file__))
 os.environ['HOME'] = project_num_path
 os.environ['USERPROFILE'] = project_num_path
+
+# 로컬 num/ocr.py를 확실히 import (pip 패키지명 충돌 방지)
+if project_num_path not in sys.path:
+    sys.path.insert(0, project_num_path)
 
 from fastapi import FastAPI, UploadFile, File
 import uvicorn
