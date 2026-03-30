@@ -258,7 +258,7 @@ function caseDisplayLabel(ev) {
     <!-- 전송 대상 선택 모달 -->
     <div v-if="showSendModal" class="modal-overlay" @click.self="showSendModal = false">
       <div class="modal-box send-modal">
-        <h3 class="modal-title">신고 전송</h3>
+        <h3 class="modal-title">사건 전송</h3>
         <p class="send-guide">해당 신고 기록을 전송할 기관을 선택해주세요.</p>
         
         <div class="send-options">
