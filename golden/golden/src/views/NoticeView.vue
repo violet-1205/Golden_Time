@@ -202,14 +202,6 @@ async function handleDelete(id) {
             <span v-if="selectedNotice.important" class="important-badge">중요</span>
             <h2 class="detail-title">
               {{ selectedNotice.title }}
-              <span
-                v-if="selectedNotice.image"
-                class="image-badge detail-image-badge"
-                aria-label="이미지 첨부"
-                title="이미지 첨부"
-              >
-                <img src="/icons/notice-image.png" alt="" class="image-icon" />
-              </span>
             </h2>
           </div>
           <div class="detail-meta">
@@ -455,6 +447,11 @@ async function handleDelete(id) {
   width: 14px;
   height: 14px;
   display: block;
+}
+
+/* 다크모드에서는 아이콘 색상이 배경에 묻히지 않도록 반전 */
+:global(html[data-theme='dark']) .notice .image-icon {
+  filter: invert(1);
 }
 
 .empty-msg {
