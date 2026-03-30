@@ -1,6 +1,8 @@
 # -----------------------------------------------------------------------------
 # GoldenTime CI — 유지보수 시 여기만 보면 됩니다.
-#   • Node/Java 버전·모노레포 폴더 경로: 아래 env 블록만 수정
+#   • Vue 프론트(golden/)는 로컬에서 빌드 후 goldentime/src/main/resources/static 에 반영·커밋하는
+#     흐름이므로, CI에서는 별도 npm 빌드를 하지 않습니다 (백엔드 JAR에 정적 리소스 포함).
+#   • Java 버전·모노레포 경로: 아래 env 블록
 #   • 트리거 브랜치: on.push / on.pull_request
 #   • OCR 전체 pip 설치는 무겁기 때문에 CI에서는 num/ 문법 검사만 수행
 #   • checkout/setup-* 액션은 Node 24 런타임 버전 사용 (GHA Node 20 deprecation 대응)
@@ -22,35 +24,11 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  NODE_VERSION: "20"
   JAVA_VERSION: "17"
-  # 모노레포 경로 (잡에서 working-directory / cache 경로에 사용)
-  DIR_FRONTEND: golden/golden
   DIR_BACKEND: goldentime
   DIR_PYTHON: num
 
 jobs:
-  frontend:
-    name: frontend — Vite build
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    defaults:
-      run:
-        working-directory: ${{ env.DIR_FRONTEND }}
-    steps:
-      - uses: actions/checkout@v6
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-          cache-dependency-path: ${{ env.DIR_FRONTEND }}/package-lock.json
-
-      - name: npm ci & build
-        run: |
-          npm ci
-          npm run build
-
   backend:
     name: backend — Gradle test + bootJar
     runs-on: ubuntu-latest
