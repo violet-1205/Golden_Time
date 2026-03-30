@@ -366,7 +366,7 @@ function sizePresetsFor(id) {
 
             <template v-else-if="element.id === 'recent'">
               <div class="recent-events-card">
-                <p class="card-label">최신 신고 목록 (5건)</p>
+                <p class="card-label">최신 사건 목록 (5건)</p>
                 <table class="events-table">
                   <thead>
                     <tr>

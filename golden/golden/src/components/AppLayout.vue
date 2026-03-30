@@ -57,13 +57,13 @@ const navItems = computed(() => {
   if (isAdmin.value) {
     return [
       { label: '대시보드', path: '/main' },
-      { label: '신고 목록', path: '/dashboard' },
+      { label: '사건 목록', path: '/dashboard' },
       { label: '회원 관리', path: '/users' },
       { label: '공지사항', path: '/notice' },
     ]
   } else {
     return [
-      { label: '신고 목록', path: '/dashboard' },
+      { label: '사건 목록', path: '/dashboard' },
       { label: '마이페이지', path: '/mypage' },
       { label: '공지사항', path: '/notice' },
       { label: '문의게시판', path: '/inquiry' },
