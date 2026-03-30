@@ -183,7 +183,7 @@ async function handleDelete(id) {
                   aria-label="이미지 첨부"
                   title="이미지 첨부"
                 >
-                  📷
+                  🖼
                 </span>
               </td>
               <td>{{ notice.createdAt }}</td>
@@ -208,7 +208,7 @@ async function handleDelete(id) {
                 aria-label="이미지 첨부"
                 title="이미지 첨부"
               >
-                📷
+                🖼
               </span>
             </h2>
           </div>
