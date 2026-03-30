@@ -73,7 +73,8 @@ jobs:
         run: ./gradlew test bootJar --no-daemon
 
   python-syntax:
-    name: python — compileall (${{ env.DIR_PYTHON }}/)
+    # job.name 에서는 env 를 쓸 수 없음 — 표시용 이름은 리터럴로 유지 (경로는 아래 env.DIR_PYTHON)
+    name: python — compileall (num/)
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
