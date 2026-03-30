@@ -125,7 +125,7 @@ function caseDisplayLabel(ev) {
       <div class="page-header">
         <div>
           <h2 class="page-title">사건 목록</h2>
-          <p class="page-subtitle">차량 주행 중 발생한 긴급 상황 및 신고 이벤트 목록입니다.</p>
+          <p class="page-subtitle">사건 목록입니다.</p>
         </div>
         <button class="btn-dark" @click="showUploadModal = true">영상 업로드</button>
       </div>
@@ -168,7 +168,7 @@ function caseDisplayLabel(ev) {
     <!-- 상세보기 모달 -->
     <div v-if="showDetailModal" class="modal-overlay" @click.self="showDetailModal = false">
       <div class="modal-box detail-modal">
-        <h3 class="modal-title">신고 상세 정보</h3>
+        <h3 class="modal-title">사건 상세 정보</h3>
         
         <div class="detail-container">
           <!-- 좌측: 영상 -->
