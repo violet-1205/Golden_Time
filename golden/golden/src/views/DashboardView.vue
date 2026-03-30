@@ -110,11 +110,11 @@ function formatTimestamp(ts) {
   }).replace(/\./g, '-').replace(/ /g, ' ').replace(/- /g, ' ');
 }
 
-/** 목록 순번 사건번호 (1번, 2번, …) — 재방문 시에도 같은 목록이면 동일하게 표시 */
+/** 목록 순번 사건번호 (AC-1, AC-2, …) — 재방문 시에도 같은 목록이면 동일하게 표시 */
 function caseDisplayLabel(ev) {
   if (!ev) return '-'
   const idx = events.value.findIndex((e) => e.gtId === ev.gtId)
-  return idx >= 0 ? `${idx + 1}번` : '-'
+  return idx >= 0 ? `AC-${idx + 1}` : '-'
 }
 
 </script>
@@ -145,7 +145,7 @@ function caseDisplayLabel(ev) {
             <td colspan="5" class="empty-msg">조회된 이벤트 데이터가 없습니다.</td>
           </tr>
           <tr v-for="(ev, idx) in events" :key="ev.gtId">
-            <td data-label="사건번호">{{ idx + 1 }}번</td>
+            <td data-label="사건번호">AC-{{ idx + 1 }}</td>
             <td data-label="기기번호">{{ ev.serialNumber || '-' }}</td>
             <td data-label="사용자 차량 번호">{{ ev.carNumber }}</td>
             <td data-label="인식 번호판">{{ ev.detectedPlate || '-' }}</td>
