@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useAuth } from '../store/auth'
 import { useData } from '../store/data'
 
@@ -26,8 +26,20 @@ function revokePreview() {
   }
 }
 
+function handlePopState() {
+  // 상세보기 상태에서 브라우저 뒤로가기 시, 우선 목록 화면으로 전환
+  if (viewMode.value === 'detail') {
+    viewMode.value = 'list'
+  }
+}
+
 onMounted(() => {
   fetchNotices()
+  window.addEventListener('popstate', handlePopState)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('popstate', handlePopState)
 })
 
 async function openDetail(notice) {
@@ -35,6 +47,8 @@ async function openDetail(notice) {
   selectedNotice.value = detail || notice
   isEditMode.value = false
   viewMode.value = 'detail'
+  // 상세보기 진입 시, 동일 URL로 히스토리 한 단계 추가 → 첫 번째 뒤로가기는 목록으로
+  window.history.pushState({ noticeView: 'detail' }, '', window.location.href)
 }
 
 const form = ref({ title: '', content: '', image: '', important: false })
@@ -199,7 +213,6 @@ async function handleDelete(id) {
           </figure>
 
           <div class="detail-actions">
-            <button type="button" class="btn-list" @click="viewMode = 'list'">뒤로가기</button>
             <button type="button" class="btn-list" @click="viewMode = 'list'">목록으로</button>
             <div v-if="isAdmin" class="detail-admin-btns">
               <button type="button" class="btn-edit" @click="openForm(selectedNotice)">수정</button>
