@@ -125,7 +125,7 @@ function caseDisplayLabel(ev) {
       <div class="page-header">
         <div>
           <h2 class="page-title">사건 목록</h2>
-          <p class="page-subtitle">사건 목록입니다.</p>
+          <p class="page-subtitle">차량 주행중 발생한 사건 목록입니다.</p>
         </div>
         <button class="btn-dark" @click="showUploadModal = true">영상 업로드</button>
       </div>
