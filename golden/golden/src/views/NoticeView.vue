@@ -183,7 +183,7 @@ async function handleDelete(id) {
                   aria-label="이미지 첨부"
                   title="이미지 첨부"
                 >
-                  🖼
+                  <img src="/icons/notice-image.png" alt="" class="image-icon" />
                 </span>
               </td>
               <td>{{ notice.createdAt }}</td>
@@ -208,7 +208,7 @@ async function handleDelete(id) {
                 aria-label="이미지 첨부"
                 title="이미지 첨부"
               >
-                🖼
+                <img src="/icons/notice-image.png" alt="" class="image-icon" />
               </span>
             </h2>
           </div>
@@ -444,12 +444,17 @@ async function handleDelete(id) {
   align-items: center;
   justify-content: center;
   margin-left: 6px;
-  font-size: 0.78rem;
   vertical-align: text-bottom;
 }
 
 .detail-image-badge {
-  font-size: 0.9rem;
+  /* 살짝 더 크게 보이도록 여백만 조정 */
+}
+
+.image-icon {
+  width: 14px;
+  height: 14px;
+  display: block;
 }
 
 .empty-msg {
