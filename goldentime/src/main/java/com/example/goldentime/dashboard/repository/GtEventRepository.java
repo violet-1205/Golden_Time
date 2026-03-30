@@ -24,6 +24,9 @@ public interface GtEventRepository extends JpaRepository<GtEvent, Long> {
     // 로그인 사용자의 차량(등록 차량) 기준으로 최근 5건을 조회
     List<GtEvent> findTop5ByVehicle_User_UserIdOrderByCreatedAtDesc(Long userId);
 
+    // 로그인 사용자의 차량(등록 차량) 기준으로 전체 사건 목록 조회 (최신순)
+    List<GtEvent> findAllByVehicle_User_UserIdOrderByCreatedAtDesc(Long userId);
+
     @Query("SELECT e.vtIdPath FROM GtEvent e WHERE e.vtIdPath IS NOT NULL")
     List<String> findAllVtIdPaths();
 }

@@ -198,6 +198,25 @@ public class DashboardService {
     }
 
     @Transactional(readOnly = true)
+    public List<GtEventResponseDto> findAllEventsForUser(String loginId) {
+        if (loginId == null || loginId.isBlank()) {
+            return List.of();
+        }
+
+        User user = userRepository.findByLoginId(loginId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다: " + loginId));
+
+        List<UserVehicle> vehicles = userVehicleRepository.findAllByUserUserId(user.getUserId());
+        if (vehicles.isEmpty()) {
+            return List.of();
+        }
+
+        return gtEventRepository.findAllByVehicle_User_UserIdOrderByCreatedAtDesc(user.getUserId()).stream()
+                .map(GtEventResponseDto::new)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
     public DashboardStatsDto getDashboardStats() {
         Double avgConfidence = gtOcrRepository.getAverageConfidence();
         

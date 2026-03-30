@@ -27,8 +27,21 @@ public class DashboardApiController {
     private final UserVehicleRepository userVehicleRepository;
 
     @GetMapping("/events")
-    public ResponseEntity<List<GtEventResponseDto>> getAllEvents() {
-        return ResponseEntity.ok(dashboardService.findAllEvents());
+    public ResponseEntity<List<GtEventResponseDto>> getAllEvents(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(401).build();
+        }
+
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
+
+        if (isAdmin) {
+            // 관리자는 전체 사건 목록 조회
+            return ResponseEntity.ok(dashboardService.findAllEvents());
+        }
+
+        // 일반 사용자는 자신의 차량으로 발생한 사건만 조회
+        return ResponseEntity.ok(dashboardService.findAllEventsForUser(authentication.getName()));
     }
 
     @GetMapping("/stats")
