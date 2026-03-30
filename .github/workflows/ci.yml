@@ -1,0 +1,83 @@
+# -----------------------------------------------------------------------------
+# GoldenTime CI — 유지보수 시 여기만 보면 됩니다.
+#   • Node/Java 버전·모노레포 폴더 경로: 아래 env 블록만 수정
+#   • 트리거 브랜치: on.push / on.pull_request
+#   • OCR 전체 pip 설치는 무겁기 때문에 CI에서는 num/ 문법 검사만 수행
+# -----------------------------------------------------------------------------
+
+name: CI
+
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+    branches: [main, master, develop]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "20"
+  JAVA_VERSION: "17"
+  # 모노레포 경로 (잡에서 working-directory / cache 경로에 사용)
+  DIR_FRONTEND: golden/golden
+  DIR_BACKEND: goldentime
+  DIR_PYTHON: num
+
+jobs:
+  frontend:
+    name: frontend — Vite build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: ${{ env.DIR_FRONTEND }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: ${{ env.DIR_FRONTEND }}/package-lock.json
+
+      - name: npm ci & build
+        run: |
+          npm ci
+          npm run build
+
+  backend:
+    name: backend — Gradle test + bootJar
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: ${{ env.DIR_BACKEND }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: gradle
+
+      - name: chmod +x gradlew
+        run: chmod +x gradlew
+
+      - name: Gradle test & bootJar
+        run: ./gradlew test bootJar --no-daemon
+
+  python-syntax:
+    name: python — compileall (${{ env.DIR_PYTHON }}/)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: compileall (no pip install)
+        run: python3 -m compileall ${{ env.DIR_PYTHON }} -q
