@@ -110,6 +110,13 @@ function formatTimestamp(ts) {
   }).replace(/\./g, '-').replace(/ /g, ' ').replace(/- /g, ' ');
 }
 
+/** 목록 순번 사건번호 (1번, 2번, …) — 재방문 시에도 같은 목록이면 동일하게 표시 */
+function caseDisplayLabel(ev) {
+  if (!ev) return '-'
+  const idx = events.value.findIndex((e) => e.gtId === ev.gtId)
+  return idx >= 0 ? `${idx + 1}번` : '-'
+}
+
 </script>
 
 <template>
@@ -137,8 +144,8 @@ function formatTimestamp(ts) {
           <tr v-if="events.length === 0">
             <td colspan="5" class="empty-msg">조회된 이벤트 데이터가 없습니다.</td>
           </tr>
-          <tr v-for="ev in events" :key="ev.gtId">
-            <td data-label="사건번호">{{ ev.gtId }}</td>
+          <tr v-for="(ev, idx) in events" :key="ev.gtId">
+            <td data-label="사건번호">{{ idx + 1 }}번</td>
             <td data-label="기기번호">{{ ev.serialNumber || '-' }}</td>
             <td data-label="사용자 차량 번호">{{ ev.carNumber }}</td>
             <td data-label="인식 번호판">{{ ev.detectedPlate || '-' }}</td>
@@ -179,7 +186,7 @@ function formatTimestamp(ts) {
             <div class="detail-info-list">
               <div class="detail-item">
                 <span class="label">사건번호</span>
-                <span class="value">{{ selectedEvent?.gtId }}</span>
+                <span class="value">{{ caseDisplayLabel(selectedEvent) }}</span>
               </div>
               <div class="detail-item">
                 <span class="label">기기번호</span>
