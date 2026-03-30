@@ -449,11 +449,6 @@ async function handleDelete(id) {
   display: block;
 }
 
-/* 다크모드에서는 아이콘 색상이 배경에 묻히지 않도록 반전 */
-:global(html[data-theme='dark']) .notice .image-icon {
-  filter: invert(1);
-}
-
 .empty-msg {
   text-align: center;
   padding: 48px;
