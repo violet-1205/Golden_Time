@@ -158,7 +158,6 @@ async function handleDelete(id) {
           <thead>
             <tr>
               <th class="col-no">번호</th>
-              <th class="col-img">이미지</th>
               <th>제목</th>
               <th class="col-date">작성일</th>
               <th class="col-views">조회수</th>
@@ -166,7 +165,7 @@ async function handleDelete(id) {
           </thead>
           <tbody>
             <tr v-if="sortedNotices.length === 0">
-              <td colspan="5" class="empty-msg">등록된 공지사항이 없습니다.</td>
+              <td colspan="4" class="empty-msg">등록된 공지사항이 없습니다.</td>
             </tr>
             <tr
               v-for="(notice, idx) in sortedNotices"
@@ -176,12 +175,16 @@ async function handleDelete(id) {
             >
               <td>{{ sortedNotices.length - idx }}</td>
               <td>
-                <img v-if="notice.image" :src="notice.image" class="thumb" alt="" />
-                <span v-else class="no-img">-</span>
-              </td>
-              <td>
                 <span v-if="notice.important" class="important-badge">중요</span>
                 {{ notice.title }}
+                <span
+                  v-if="notice.image"
+                  class="image-badge"
+                  aria-label="이미지 첨부"
+                  title="이미지 첨부"
+                >
+                  📷
+                </span>
               </td>
               <td>{{ notice.createdAt }}</td>
               <td>{{ notice.views }}</td>
@@ -197,7 +200,17 @@ async function handleDelete(id) {
         <div class="detail-page-header">
           <div class="detail-title-row">
             <span v-if="selectedNotice.important" class="important-badge">중요</span>
-            <h2 class="detail-title">{{ selectedNotice.title }}</h2>
+            <h2 class="detail-title">
+              {{ selectedNotice.title }}
+              <span
+                v-if="selectedNotice.image"
+                class="image-badge detail-image-badge"
+                aria-label="이미지 첨부"
+                title="이미지 첨부"
+              >
+                📷
+              </span>
+            </h2>
           </div>
           <div class="detail-meta">
             <span v-if="selectedNotice.author" class="detail-meta-item">작성자: {{ selectedNotice.author }}</span>
@@ -424,6 +437,19 @@ async function handleDelete(id) {
   margin-right: 6px;
   border: 1px solid #fde68a;
   letter-spacing: 0.02em;
+}
+
+.image-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 6px;
+  font-size: 0.78rem;
+  vertical-align: text-bottom;
+}
+
+.detail-image-badge {
+  font-size: 0.9rem;
 }
 
 .empty-msg {
