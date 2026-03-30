@@ -1,10 +1,8 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
 import { useAuth } from '../store/auth'
 import { useData } from '../store/data'
 
-const router = useRouter()
 const { isAdmin } = useAuth()
 const { notices, addNotice, updateNotice, deleteNotice, fetchNotices, fetchNoticeDetail } = useData()
 
@@ -127,15 +125,6 @@ async function handleDelete(id) {
   }
   viewMode.value = 'list'
 }
-
-function handleBack() {
-  // 브라우저 히스토리가 있으면 그대로 뒤로가기, 아니면 공지 목록으로 이동
-  if (window.history.length > 1) {
-    router.back()
-  } else {
-    viewMode.value = 'list'
-  }
-}
 </script>
 
 <template>
@@ -210,7 +199,8 @@ function handleBack() {
           </figure>
 
           <div class="detail-actions">
-            <button type="button" class="btn-list" @click="handleBack">목록으로</button>
+            <button type="button" class="btn-list" @click="viewMode = 'list'">뒤로가기</button>
+            <button type="button" class="btn-list" @click="viewMode = 'list'">목록으로</button>
             <div v-if="isAdmin" class="detail-admin-btns">
               <button type="button" class="btn-edit" @click="openForm(selectedNotice)">수정</button>
               <button type="button" class="btn-delete" @click="handleDelete(selectedNotice.id)">삭제</button>
