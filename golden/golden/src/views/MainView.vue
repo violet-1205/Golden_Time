@@ -68,6 +68,13 @@ const topRegions = computed(() => {
 
 const maxRegionCount = computed(() => (topRegions.value.length ? topRegions.value[0].count : 1))
 
+/** 사건 목록과 동일 AC-n 표기 (전체 events 배열 기준 순번) */
+function caseDisplayLabel(ev) {
+  if (!ev) return '-'
+  const idx = events.value.findIndex((e) => e.gtId === ev.gtId)
+  return idx >= 0 ? `AC-${idx + 1}` : '-'
+}
+
 // ========= 대시보드 배치 변경(드래그) =========
 const DASH_LAYOUT_KEY = 'goldentime.dashboard.main.layout.v2'
 
@@ -370,6 +377,7 @@ function sizePresetsFor(id) {
                 <table class="events-table">
                   <thead>
                     <tr>
+                      <th>사건번호</th>
                       <th>사용자 차량 번호</th>
                       <th>인식된 번호판</th>
                       <th>발생 시각</th>
@@ -378,6 +386,7 @@ function sizePresetsFor(id) {
                   </thead>
                   <tbody>
                     <tr v-for="event in recentEvents" :key="event.gtId">
+                      <td data-label="사건번호">{{ caseDisplayLabel(event) }}</td>
                       <td data-label="사용자 차량 번호">{{ event.carNumber }}</td>
                       <td data-label="인식된 번호판">{{ event.detectedPlate || '-' }}</td>
                       <td data-label="발생 시각">{{ new Date(event.createdAt).toLocaleString() }}</td>
