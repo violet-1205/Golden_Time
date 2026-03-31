@@ -66,7 +66,7 @@ function formatDate(dateStr) {
       <table class="data-table">
         <thead>
           <tr>
-            <th class="col-no">ID</th>
+            <th class="col-no">회원번호</th>
             <th>로그인 ID</th>
             <th>이름</th>
             <th>전화번호</th>
