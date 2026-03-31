@@ -34,6 +34,8 @@ import java.util.stream.Collectors;
 import java.util.Map;
 import java.util.function.Function;
 
+import java.time.ZoneId;
+
 @Service
 public class DashboardService {
 
@@ -220,7 +222,7 @@ public class DashboardService {
     public DashboardStatsDto getDashboardStats() {
         Double avgConfidence = gtOcrRepository.getAverageConfidence();
         
-        java.time.LocalDateTime startOfDay = java.time.LocalDate.now().atStartOfDay();
+        java.time.LocalDateTime startOfDay = java.time.LocalDate.now(ZoneId.of("Asia/Seoul")).atStartOfDay();
         long totalToday = gtEventRepository.countByCreatedAtAfter(startOfDay);
         long sentToFire = gtEventRepository.countByCreatedAtAfterAndSentToFireTrue(startOfDay);
         long sentToSafety = gtEventRepository.countByCreatedAtAfterAndSentToSafetyTrue(startOfDay);

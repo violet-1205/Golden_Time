@@ -2,6 +2,7 @@
 import { ref, onMounted, watch } from 'vue'
 import { useAuth } from '../store/auth'
 import { useData } from '../store/data'
+import { formatKstDateTime } from '../utils/datetime'
 
 const { currentUser } = useAuth()
 const { events, fetchEvents, addEvent, deleteEvent, sendEvent, updateEvent } = useData()
@@ -101,15 +102,6 @@ async function handleSend(target) {
   }
 }
 
-function formatTimestamp(ts) {
-  if (!ts) return '-'
-  return new Date(ts).toLocaleString('ko-KR', {
-    year: 'numeric', month: '2-digit', day: '2-digit',
-    hour: '2-digit', minute: '2-digit', second: '2-digit',
-    hour12: false
-  }).replace(/\./g, '-').replace(/ /g, ' ').replace(/- /g, ' ');
-}
-
 /** 목록 순번 사건번호 (AC-1, AC-2, …) — 재방문 시에도 같은 목록이면 동일하게 표시 */
 function caseDisplayLabel(ev) {
   if (!ev) return '-'
@@ -206,7 +198,7 @@ function caseDisplayLabel(ev) {
               </div>
               <div class="detail-item">
                 <span class="label">발생일시</span>
-                <span class="value">{{ formatTimestamp(selectedEvent?.createdAt) }}</span>
+                <span class="value">{{ formatKstDateTime(selectedEvent?.createdAt) }}</span>
               </div>
             </div>
           </div>

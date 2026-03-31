@@ -2,6 +2,7 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useData } from '../store/data'
 import { useAuth } from '../store/auth'
+import { formatKstDateTime } from '../utils/datetime'
 import { VueDraggableNext as Draggable } from 'vue-draggable-next'
 
 const { events, fetchEvents, stats, fetchStats, recentEvents, fetchRecentEvents, eventsByRegion, fetchEventsByRegion } = useData()
@@ -389,7 +390,7 @@ function sizePresetsFor(id) {
                       <td data-label="사건번호">{{ caseDisplayLabel(event) }}</td>
                       <td data-label="사용자 차량 번호">{{ event.carNumber }}</td>
                       <td data-label="인식된 번호판">{{ event.detectedPlate || '-' }}</td>
-                      <td data-label="발생 시각">{{ new Date(event.createdAt).toLocaleString() }}</td>
+                      <td data-label="발생 시각">{{ formatKstDateTime(event.createdAt) }}</td>
                       <td data-label="신고 상태">
                         <span v-if="event.sentToFire" class="status-tag fire">소방청</span>
                         <span v-else-if="event.sentToSafety" class="status-tag safety">안전신문고</span>
