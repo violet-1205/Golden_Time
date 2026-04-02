@@ -22,7 +22,9 @@ public class GtEventResponseDto {
     private boolean sentToFire;
     private boolean sentToSafety;
     private LocalDateTime createdAt;
-    
+    /** 차량 소유자 회원 이름 (관리자 사건 목록에서 표시용) */
+    private String memberName;
+
     // OCR 정보 추가
     private String detectedPlate;
     private Float confidence;
@@ -37,7 +39,10 @@ public class GtEventResponseDto {
         this.sentToFire = entity.isSentToFire();
         this.sentToSafety = entity.isSentToSafety();
         this.createdAt = entity.getCreatedAt();
-        
+        if (entity.getVehicle() != null && entity.getVehicle().getUser() != null) {
+            this.memberName = entity.getVehicle().getUser().getUserName();
+        }
+
         // OCR 결과 매핑 (있을 경우)
         if (entity.getOcrResult() != null) {
             this.detectedPlate = entity.getOcrResult().getDetectedPlate();

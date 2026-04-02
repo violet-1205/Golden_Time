@@ -4,7 +4,7 @@ import { useAuth } from '../store/auth'
 import { useData } from '../store/data'
 import { formatKstDateTime } from '../utils/datetime'
 
-const { currentUser } = useAuth()
+const { currentUser, isAdmin } = useAuth()
 const { events, fetchEvents, addEvent, deleteEvent, sendEvent, updateEvent } = useData()
 
 onMounted(async () => {
@@ -137,7 +137,10 @@ function caseDisplayLabel(ev) {
             <td colspan="5" class="empty-msg">조회된 이벤트 데이터가 없습니다.</td>
           </tr>
           <tr v-for="(ev, idx) in events" :key="ev.gtId">
-            <td data-label="사건번호">AC-{{ idx + 1 }}</td>
+            <td data-label="사건번호">
+              <span class="case-no">AC-{{ idx + 1 }}</span><template v-if="isAdmin && ev.memberName">
+                <span class="case-member-name">{{ ev.memberName }}</span></template>
+            </td>
             <td data-label="기기번호">{{ ev.serialNumber || '-' }}</td>
             <td data-label="사용자 차량 번호">{{ ev.carNumber }}</td>
             <td data-label="인식 번호판">{{ ev.detectedPlate || '-' }}</td>
@@ -343,6 +346,13 @@ function caseDisplayLabel(ev) {
   padding: 14px 20px;
   border-bottom: 1px solid var(--border-solid);
   color: #2d3748;
+}
+
+.case-member-name {
+  margin-left: 0.4rem;
+  font-weight: 600;
+  color: #64748b;
+  font-size: 0.92em;
 }
 
 .btn-detail {

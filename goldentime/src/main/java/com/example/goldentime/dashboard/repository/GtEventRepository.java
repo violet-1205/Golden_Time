@@ -3,6 +3,7 @@ package com.example.goldentime.dashboard.repository;
 import com.example.goldentime.dashboard.entity.GtEvent;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -25,7 +26,8 @@ public interface GtEventRepository extends JpaRepository<GtEvent, Long> {
     List<GtEvent> findTop5ByVehicle_User_UserIdOrderByCreatedAtDesc(Long userId);
 
     // 로그인 사용자의 차량(등록 차량) 기준으로 전체 사건 목록 조회 (최신순)
-    List<GtEvent> findAllByVehicle_User_UserIdOrderByCreatedAtDesc(Long userId);
+    @Query("SELECT e FROM GtEvent e JOIN FETCH e.vehicle v JOIN FETCH v.user u WHERE u.userId = :userId ORDER BY e.createdAt DESC")
+    List<GtEvent> findAllByVehicle_User_UserIdOrderByCreatedAtDesc(@Param("userId") Long userId);
 
     @Query("SELECT e.vtIdPath FROM GtEvent e WHERE e.vtIdPath IS NOT NULL")
     List<String> findAllVtIdPaths();
