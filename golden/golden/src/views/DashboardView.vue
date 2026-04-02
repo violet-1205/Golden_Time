@@ -125,7 +125,8 @@ function caseDisplayLabel(ev) {
       <table class="data-table">
         <thead>
           <tr>
-            <th>사건번호</th>
+            <th>사건 번호</th>
+            <th v-if="isAdmin">이름</th>
             <th>기기번호</th>
             <th>사용자 차량 번호</th>
             <th>인식 번호판</th>
@@ -134,13 +135,11 @@ function caseDisplayLabel(ev) {
         </thead>
         <tbody>
           <tr v-if="events.length === 0">
-            <td colspan="5" class="empty-msg">조회된 이벤트 데이터가 없습니다.</td>
+            <td :colspan="isAdmin ? 6 : 5" class="empty-msg">조회된 이벤트 데이터가 없습니다.</td>
           </tr>
           <tr v-for="(ev, idx) in events" :key="ev.gtId">
-            <td data-label="사건번호">
-              <span class="case-no">AC-{{ idx + 1 }}</span><template v-if="isAdmin && ev.memberName">
-                <span class="case-member-name">{{ ev.memberName }}</span></template>
-            </td>
+            <td data-label="사건 번호">AC-{{ idx + 1 }}</td>
+            <td v-if="isAdmin" data-label="이름" class="td-member-name">{{ ev.memberName || '-' }}</td>
             <td data-label="기기번호">{{ ev.serialNumber || '-' }}</td>
             <td data-label="사용자 차량 번호">{{ ev.carNumber }}</td>
             <td data-label="인식 번호판">{{ ev.detectedPlate || '-' }}</td>
@@ -348,11 +347,9 @@ function caseDisplayLabel(ev) {
   color: #2d3748;
 }
 
-.case-member-name {
-  margin-left: 0.4rem;
+.td-member-name {
+  color: #334155;
   font-weight: 600;
-  color: #64748b;
-  font-size: 0.92em;
 }
 
 .btn-detail {
@@ -740,7 +737,7 @@ function caseDisplayLabel(ev) {
   }
 
   /* 모바일에서 번호/기기값은 monospace + 줄바꿈 억제로 더 또렷하게 */
-  .data-table td[data-label="사건번호"],
+  .data-table td[data-label="사건 번호"],
   .data-table td[data-label="기기번호"] {
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
       'Courier New', monospace;
