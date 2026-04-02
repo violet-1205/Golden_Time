@@ -220,15 +220,21 @@ public class DashboardService {
 
     @Transactional(readOnly = true)
     public DashboardStatsDto getDashboardStats() {
-        Double avgConfidence = gtOcrRepository.getAverageConfidence();
-        
         java.time.LocalDateTime startOfDay = java.time.LocalDate.now(ZoneId.of("Asia/Seoul")).atStartOfDay();
+
+        double avgConfidence = 0.0;
+        if (gtEventRepository.count() > 0) {
+            Double avg = gtOcrRepository.getAverageConfidence();
+            if (avg != null) {
+                avgConfidence = avg;
+            }
+        }
         long totalToday = gtEventRepository.countByCreatedAtAfter(startOfDay);
         long sentToFire = gtEventRepository.countByCreatedAtAfterAndSentToFireTrue(startOfDay);
         long sentToSafety = gtEventRepository.countByCreatedAtAfterAndSentToSafetyTrue(startOfDay);
 
         return new DashboardStatsDto(
-            avgConfidence != null ? avgConfidence : 0.0,
+            avgConfidence,
             totalToday,
             sentToFire,
             sentToSafety

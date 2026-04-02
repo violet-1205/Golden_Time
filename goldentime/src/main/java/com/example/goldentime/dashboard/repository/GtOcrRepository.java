@@ -11,6 +11,7 @@ import java.util.Optional;
 public interface GtOcrRepository extends JpaRepository<GtOcr, Long> {
     Optional<GtOcr> findByGtEvent_GtId(Long gtId);
 
-    @Query("SELECT AVG(o.confidence) FROM GtOcr o")
+    /** 존재하는 사건(GtEvent)에 연결된 OCR만 평균 — 사건 삭제 후 고아 행·과거 잔여치 제외 */
+    @Query("SELECT AVG(o.confidence) FROM GtOcr o INNER JOIN o.gtEvent e")
     Double getAverageConfidence();
 }
