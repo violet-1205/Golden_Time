@@ -1,4 +1,4 @@
-# 골든타임 (Golden Time)
+<img width="3350" height="1359" alt="image" src="https://github.com/user-attachments/assets/3282ced0-4597-41d4-9267-b7f30a588653" /># 골든타임 (Golden Time)
 
 차량 주행 영상을 업로드하면 번호판 OCR 파이프라인으로 인식하고, 사건·통계·공지 등을 관리하는 웹 애플리케이션입니다.
 
@@ -67,6 +67,11 @@ GitHub Actions(`.github/workflows/ci.yml`)에서 백엔드 Gradle 테스트·`bo
 
 - [OCR 신뢰도·평균 인식률](OCR_CONFIDENCE.md)
 - [보안 관련](SECURITY_GUIDE.md)
+
+## 아키텍처 다이어그램
+
+<img width="3350" height="1359" alt="image" src="https://github.com/user-attachments/assets/27f810a2-9691-4b5c-a232-fc0845aebc26" />
+
 
 ## 라이선스
 
