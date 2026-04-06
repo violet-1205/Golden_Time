@@ -1,5 +1,3 @@
-<img width="3350" height="1359" alt="image" src="https://github.com/user-attachments/assets/3282ced0-4597-41d4-9267-b7f30a588653" /># 골든타임 (Golden Time)
-
 차량 주행 영상을 업로드하면 번호판 OCR 파이프라인으로 인식하고, 사건·통계·공지 등을 관리하는 웹 애플리케이션입니다.
 
 ## 구성
