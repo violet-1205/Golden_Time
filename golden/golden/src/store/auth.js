@@ -57,14 +57,10 @@ export function useAuth() {
   }
 
   async function logout() {
-    try {
-      await csrfFetch('/api/auth/logout', { method: 'POST' })
-    } catch (error) {
-      console.error('Logout error:', error)
-    } finally {
-      state.currentUser = null
-      window.location.href = '/login'
-    }
+    state.currentUser = null
+    window.location.href = '/login'
+    // 로그아웃 API는 백그라운드로 처리 (응답 기다리지 않음)
+    csrfFetch('/api/auth/logout', { method: 'POST' }).catch(() => {})
   }
 
   async function register(username, name, password, phone, email, address, vehicleNumber, deviceSerial) {

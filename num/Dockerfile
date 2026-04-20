@@ -12,7 +12,21 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+
+# CPU 전용 torch 설치 (용량 절약)
+RUN pip install --no-cache-dir torch torchvision --index-url https://download.pytorch.org/whl/cpu
+
+RUN pip install --no-cache-dir \
+    fastapi \
+    "uvicorn[standard]" \
+    python-multipart \
+    paddlepaddle \
+    paddleocr \
+    opencv-python-headless \
+    numpy \
+    ultralytics \
+    matplotlib \
+    scipy
 
 COPY . .
 

@@ -133,7 +133,7 @@ export function useData() {
       })
 
       if (response.ok) {
-        await fetchEvents()
+        fetchEvents() // 백그라운드로 목록 새로고침
         return { success: true }
       }
       const text = await response.text().catch(() => '')
