@@ -59,4 +59,23 @@ public class SupabaseStorageService {
         if (!enabled || path == null) return path;
         return supabaseUrl + "/storage/v1/object/public/" + bucket + "/" + path;
     }
+
+    // Supabase Storage에서 파일 삭제 (public URL로부터 파일명 추출)
+    public void deleteVideo(String publicUrl) {
+        if (!enabled || publicUrl == null) return;
+        try {
+            String prefix = supabaseUrl + "/storage/v1/object/public/" + bucket + "/";
+            if (!publicUrl.startsWith(prefix)) return;
+            String fileName = publicUrl.substring(prefix.length());
+
+            webClient.delete()
+                    .uri(supabaseUrl + "/storage/v1/object/" + bucket + "/" + fileName)
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + supabaseKey)
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .block();
+        } catch (Exception e) {
+            System.err.println("Supabase 파일 삭제 실패: " + e.getMessage());
+        }
+    }
 }

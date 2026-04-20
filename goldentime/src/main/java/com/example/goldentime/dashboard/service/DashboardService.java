@@ -250,8 +250,12 @@ public class DashboardService {
         GtEvent event = gtEventRepository.findById(gtId)
                 .orElseThrow(() -> new IllegalArgumentException("이벤트를 찾을 수 없습니다. ID: " + gtId));
 
-        if (event.getVideoPath() != null && !supabaseStorageService.isEnabled()) {
-            deleteVideoFileLocally(event.getVideoPath());
+        if (event.getVideoPath() != null) {
+            if (supabaseStorageService.isEnabled()) {
+                supabaseStorageService.deleteVideo(event.getVideoPath());
+            } else {
+                deleteVideoFileLocally(event.getVideoPath());
+            }
         }
 
         gtEventRepository.delete(event);
