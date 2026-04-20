@@ -7,11 +7,13 @@ import com.example.goldentime.dashboard.entity.GtEvent;
 import com.example.goldentime.dashboard.entity.GtOcr;
 import com.example.goldentime.dashboard.repository.GtEventRepository;
 import com.example.goldentime.dashboard.repository.GtOcrRepository;
+import com.example.goldentime.storage.SupabaseStorageService;
 import com.example.goldentime.user.entity.User;
 import com.example.goldentime.user.entity.UserVehicle;
 import com.example.goldentime.user.repository.UserRepository;
 import com.example.goldentime.user.repository.UserVehicleRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;
@@ -31,9 +33,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import java.util.Map;
 import java.util.function.Function;
-
 import java.time.ZoneId;
 
 @Service
@@ -44,8 +44,9 @@ public class DashboardService {
     private final UserRepository userRepository;
     private final GtOcrRepository gtOcrRepository;
     private final WebClient webClient;
+    private final SupabaseStorageService supabaseStorageService;
     private final ObjectMapper objectMapper = new ObjectMapper();
-    
+
     private static final String[] RANDOM_LOCATIONS = {
         "서울특별시 강남구 테헤란로 123", "부산광역시 해운대구 우동 456", "대구광역시 중구 동성로 789",
         "인천광역시 연수구 송도동 101", "광주광역시 서구 치평동 202", "대전광역시 유성구 봉명동 303",
@@ -57,17 +58,20 @@ public class DashboardService {
 
     private final OcrPersistenceService ocrPersistenceService;
 
-    public DashboardService(GtEventRepository gtEventRepository, 
+    public DashboardService(GtEventRepository gtEventRepository,
                             UserVehicleRepository userVehicleRepository,
                             UserRepository userRepository,
                             GtOcrRepository gtOcrRepository,
-                            OcrPersistenceService ocrPersistenceService) {
+                            OcrPersistenceService ocrPersistenceService,
+                            SupabaseStorageService supabaseStorageService,
+                            @Value("${app.ocr.url:http://localhost:8000}") String ocrUrl) {
         this.gtEventRepository = gtEventRepository;
         this.userVehicleRepository = userVehicleRepository;
         this.userRepository = userRepository;
         this.gtOcrRepository = gtOcrRepository;
         this.ocrPersistenceService = ocrPersistenceService;
-        this.webClient = WebClient.create("http://localhost:8000");
+        this.supabaseStorageService = supabaseStorageService;
+        this.webClient = WebClient.create(ocrUrl);
     }
 
     @Transactional
@@ -80,7 +84,6 @@ public class DashboardService {
             vehicle = userVehicleRepository.findById(requestDto.getVehicleId())
                     .orElseThrow(() -> new IllegalArgumentException("차량을 찾을 수 없습니다. ID: " + requestDto.getVehicleId()));
         } else {
-            // 차량이 지정되지 않은 경우 사용자의 첫 번째 차량 사용
             List<UserVehicle> vehicles = userVehicleRepository.findAllByUserUserId(user.getUserId());
             if (vehicles.isEmpty()) {
                 throw new IllegalStateException("등록된 차량이 없어 영상을 업로드할 수 없습니다. 마이페이지에서 차량을 먼저 등록해주세요.");
@@ -90,8 +93,7 @@ public class DashboardService {
 
         GtEvent event = new GtEvent();
         event.setVehicle(vehicle);
-        
-        // vt_id_path 설정 (입력값이 없으면 랜덤 위치 할당)
+
         if (requestDto.getVtIdPath() == null || requestDto.getVtIdPath().trim().isEmpty()) {
             String randomLoc = RANDOM_LOCATIONS[new Random().nextInt(RANDOM_LOCATIONS.length)];
             event.setVtIdPath(randomLoc);
@@ -100,24 +102,33 @@ public class DashboardService {
         }
 
         GtEvent savedEvent = gtEventRepository.save(event);
-        System.out.println("Saved initial GtEvent with ID: " + savedEvent.getGtId());
 
         if (requestDto.getVideoFile() != null && !requestDto.getVideoFile().isEmpty()) {
-            Path videoPath = saveVideo(requestDto.getVideoFile());
-            System.out.println("Video saved to: " + videoPath);
-            savedEvent.setVideoPath("/videos/" + videoPath.getFileName().toString());
-            gtEventRepository.save(savedEvent);
-            System.out.println("Updated GtEvent with video path");
+            MultipartFile file = requestDto.getVideoFile();
 
-            // OCR 처리 (비동기)
-            runOcrAndSaveResult(savedEvent, videoPath);
+            if (supabaseStorageService.isEnabled()) {
+                // Supabase Storage에 업로드
+                String publicUrl = supabaseStorageService.uploadVideo(
+                        file.getBytes(),
+                        file.getOriginalFilename(),
+                        file.getContentType()
+                );
+                savedEvent.setVideoPath(publicUrl);
+                gtEventRepository.save(savedEvent);
+                runOcrAndSaveResultFromLocalTemp(savedEvent, file);
+            } else {
+                // 로컬 저장 (개발 환경)
+                Path videoPath = saveVideoLocally(file);
+                savedEvent.setVideoPath("/videos/" + videoPath.getFileName().toString());
+                gtEventRepository.save(savedEvent);
+                runOcrAndSaveResult(savedEvent, videoPath);
+            }
         }
 
         return savedEvent;
     }
 
     private void runOcrAndSaveResult(GtEvent event, Path videoPath) {
-        System.out.println("Starting OCR request for event ID: " + event.getGtId() + ", video: " + videoPath);
         MultipartBodyBuilder builder = new MultipartBodyBuilder();
         builder.part("file", new FileSystemResource(videoPath));
 
@@ -128,23 +139,33 @@ public class DashboardService {
                 .retrieve()
                 .bodyToMono(Map.class)
                 .subscribe(result -> {
-                    System.out.println("Received OCR response for event " + event.getGtId() + ": " + result);
                     if (result.containsKey("error")) {
                         System.err.println("OCR API error: " + result.get("error"));
                         return;
                     }
-                    // 별도 트랜잭션으로 OCR 결과 저장
                     ocrPersistenceService.saveOcrResult(event.getGtId(), result);
                 }, error -> {
                     System.err.println("OCR request failed for event " + event.getGtId() + ": " + error.getMessage());
-                    error.printStackTrace();
                 });
     }
 
-    private Path saveVideo(MultipartFile file) throws IOException {
+    // Supabase 사용 시: 임시파일로 저장 후 OCR 전송 (OCR 서버도 Railway에 있으면 URL 방식으로 변경 가능)
+    private void runOcrAndSaveResultFromLocalTemp(GtEvent event, MultipartFile file) {
+        try {
+            Path tempPath = Files.createTempFile("ocr_", "_" + file.getOriginalFilename());
+            Files.write(tempPath, file.getBytes());
+            runOcrAndSaveResult(event, tempPath);
+            // 임시 파일은 JVM 종료 시 자동 삭제 예약
+            tempPath.toFile().deleteOnExit();
+        } catch (IOException e) {
+            System.err.println("Failed to create temp file for OCR: " + e.getMessage());
+        }
+    }
+
+    private Path saveVideoLocally(MultipartFile file) throws IOException {
         String projectPath = System.getProperty("user.dir");
         String fullPath = projectPath + File.separator + "external-data" + File.separator + "videos";
-        
+
         File directory = new File(fullPath);
         if (!directory.exists()) {
             directory.mkdirs();
@@ -153,7 +174,6 @@ public class DashboardService {
         String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
         Path filePath = Paths.get(fullPath, fileName);
         Files.write(filePath, file.getBytes());
-
         return filePath;
     }
 
@@ -166,18 +186,13 @@ public class DashboardService {
 
     @Transactional(readOnly = true)
     public List<GtEventResponseDto> findTop5RecentEventsForUser(String loginId) {
-        if (loginId == null || loginId.isBlank()) {
-            return List.of();
-        }
+        if (loginId == null || loginId.isBlank()) return List.of();
 
         User user = userRepository.findByLoginId(loginId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다: " + loginId));
 
-        // 사용자가 등록한 차량이 없으면 최근 신고도 보여줄 수 없음
         List<UserVehicle> vehicles = userVehicleRepository.findAllByUserUserId(user.getUserId());
-        if (vehicles.isEmpty()) {
-            return List.of();
-        }
+        if (vehicles.isEmpty()) return List.of();
 
         return gtEventRepository.findTop5ByVehicle_User_UserIdOrderByCreatedAtDesc(user.getUserId()).stream()
                 .map(GtEventResponseDto::new)
@@ -188,7 +203,7 @@ public class DashboardService {
     public Map<String, Long> getEventCountsByRegion() {
         List<String> paths = gtEventRepository.findAllVtIdPaths();
         return paths.stream()
-                .map(path -> path.split(" ")[0]) // 주소에서 첫 단어(지역명) 추출
+                .map(path -> path.split(" ")[0])
                 .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
     }
 
@@ -201,17 +216,13 @@ public class DashboardService {
 
     @Transactional(readOnly = true)
     public List<GtEventResponseDto> findAllEventsForUser(String loginId) {
-        if (loginId == null || loginId.isBlank()) {
-            return List.of();
-        }
+        if (loginId == null || loginId.isBlank()) return List.of();
 
         User user = userRepository.findByLoginId(loginId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다: " + loginId));
 
         List<UserVehicle> vehicles = userVehicleRepository.findAllByUserUserId(user.getUserId());
-        if (vehicles.isEmpty()) {
-            return List.of();
-        }
+        if (vehicles.isEmpty()) return List.of();
 
         return gtEventRepository.findAllByVehicle_User_UserIdOrderByCreatedAtDesc(user.getUserId()).stream()
                 .map(GtEventResponseDto::new)
@@ -225,35 +236,24 @@ public class DashboardService {
         double avgConfidence = 0.0;
         if (gtEventRepository.count() > 0) {
             Double avg = gtOcrRepository.getAverageConfidence();
-            if (avg != null) {
-                avgConfidence = avg;
-            }
+            if (avg != null) avgConfidence = avg;
         }
         long totalToday = gtEventRepository.countByCreatedAtAfter(startOfDay);
         long sentToFire = gtEventRepository.countByCreatedAtAfterAndSentToFireTrue(startOfDay);
         long sentToSafety = gtEventRepository.countByCreatedAtAfterAndSentToSafetyTrue(startOfDay);
 
-        return new DashboardStatsDto(
-            avgConfidence,
-            totalToday,
-            sentToFire,
-            sentToSafety
-        );
+        return new DashboardStatsDto(avgConfidence, totalToday, sentToFire, sentToSafety);
     }
 
     @Transactional
     public void deleteEvent(Long gtId) {
         GtEvent event = gtEventRepository.findById(gtId)
                 .orElseThrow(() -> new IllegalArgumentException("이벤트를 찾을 수 없습니다. ID: " + gtId));
-        
-        // 연관된 OCR 데이터는 CascadeType.ALL에 의해 자동 삭제됨
 
-        // 1. 비디오 파일 삭제 (옵션)
-        if (event.getVideoPath() != null) {
-            deleteVideoFile(event.getVideoPath());
+        if (event.getVideoPath() != null && !supabaseStorageService.isEnabled()) {
+            deleteVideoFileLocally(event.getVideoPath());
         }
-        
-        // 3. 이벤트 삭제
+
         gtEventRepository.delete(event);
     }
 
@@ -261,7 +261,7 @@ public class DashboardService {
     public void sendEvent(Long gtId, String target) {
         GtEvent event = gtEventRepository.findById(gtId)
                 .orElseThrow(() -> new IllegalArgumentException("이벤트를 찾을 수 없습니다. ID: " + gtId));
-        
+
         if ("fire".equalsIgnoreCase(target)) {
             event.setSentToFire(true);
         } else if ("safety".equalsIgnoreCase(target)) {
@@ -269,18 +269,16 @@ public class DashboardService {
         } else {
             throw new IllegalArgumentException("잘못된 전송 대상입니다: " + target);
         }
-        
+
         gtEventRepository.save(event);
     }
 
-    private void deleteVideoFile(String videoPath) {
+    private void deleteVideoFileLocally(String videoPath) {
         try {
             String projectPath = System.getProperty("user.dir");
-            // videoPath는 "/videos/filename.mp4" 형식이므로 앞의 /를 제거하고 결합
             Path filePath = Paths.get(projectPath, "external-data", "videos", videoPath.replace("/videos/", ""));
             Files.deleteIfExists(filePath);
         } catch (IOException e) {
-            // 파일 삭제 실패는 로깅만 하고 계속 진행
             System.err.println("Failed to delete video file: " + videoPath);
         }
     }

@@ -24,6 +24,10 @@ from ocr import recognize_plate_from_video
 
 app = FastAPI()
 
+@app.get("/")
+async def health_check():
+    return {"status": "ok"}
+
 @app.post("/ocr")
 async def ocr_endpoint(file: UploadFile = File(...)):
     start_time = time.time()
