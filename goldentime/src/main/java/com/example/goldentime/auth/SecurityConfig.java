@@ -101,9 +101,11 @@ public class SecurityConfig {
                                 // Google Fonts font 파일
                                 "font-src 'self' https://fonts.gstatic.com data:",
                                 // 이미지/미리보기(data/blob) 허용
-                                "img-src 'self' data: blob:",
+                                "img-src 'self' data: blob: https://*.supabase.co",
+                                // Supabase Storage 영상 재생 허용
+                                "media-src 'self' blob: https://*.supabase.co",
                                 // API 호출은 동일 origin(배포 시) 기준
-                                "connect-src 'self'",
+                                "connect-src 'self' https://*.supabase.co",
                                 // 문의게시판: Google Forms iframe — default-src만 있으면 frame-src가 self로 떨어져 임베드 차단됨
                                 "frame-src 'self' https://docs.google.com https://*.google.com https://*.gstatic.com https://*.googleusercontent.com",
                                 // 이 사이트를 다른 origin에 iframe으로 넣는 것만 차단(클릭재킹 방지)
