@@ -66,9 +66,6 @@ GitHub Actions(`.github/workflows/ci.yml`)에서 백엔드 Gradle 테스트·`bo
 - [OCR 신뢰도·평균 인식률](OCR_CONFIDENCE.md)
 - [보안 관련](SECURITY_GUIDE.md)
 
-## 아키텍처 다이어그램
-
-<img width="3350" height="1359" alt="image" src="https://github.com/user-attachments/assets/27f810a2-9691-4b5c-a232-fc0845aebc26" />
 
 
 ## 라이선스
